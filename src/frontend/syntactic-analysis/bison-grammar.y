@@ -16,58 +16,71 @@
 	*/
 
 	// No-terminales (frontend).
-	int program;
-	int expression;
-	int factor;
-	int constant;
+	int start;
+	int uml;
+	int umlBody;
+	int classDefinition;
+	int classModifier;
+	int classBody;
 
 	// Terminales.
 	token token;
-	int integer;
+	char symbolName[33];
 }
 
 // IDs y tipos de los tokens terminales generados desde Flex.
-%token <token> ADD
-%token <token> SUB
-%token <token> MUL
-%token <token> DIV
+%token <token> STARTUML
+%token <token> ENDUML
 
-%token <token> OPEN_PARENTHESIS
-%token <token> CLOSE_PARENTHESIS
+%token <token> CLASS
 
-%token <integer> INTEGER
+%token <token> ABSTRACT
+%token <token> FINAL
+
+%token <token> OPEN_BLOCK
+%token <token> CLOSE_BLOCK
+
+%token <symbolName> SYMBOLNAME
 
 // Tipos de dato para los no-terminales generados desde Bison.
-%type <program> program
-%type <expression> expression
-%type <factor> factor
-%type <constant> constant
+%type <start> start
+%type <uml> uml
+%type <umlBody> umlBody
+%type <classDefinition> classDefinition
+%type <classModifier> classModifier
+%type <classBody> classBody
+%type <symbolName> symbolName
 
 // Reglas de asociatividad y precedencia (de menor a mayor).
-%left ADD SUB
-%left MUL DIV
+// ((las borré todos))
 
 // El símbolo inicial de la gramatica.
-%start program
+%start start
 
 %%
 
-program: expression													{ $$ = ProgramGrammarAction($1); }
+start: uml															{ $$ = StartGrammarAction($1); }
+
+uml: STARTUML umlBody[body] ENDUML uml[nextUml]						{ $$ = UmlGrammarAction($body, $nextUml); }
+	| /* lambda */													{ $$ = 0; }
+
+umlBody: classDefinition[classDef] umlBody[body]					{ $$ = UmlBodyGrammarAction($classDef, $body); }
+	| /* lambda */													{ $$ = 0; }
+
+classDefinition:
+	classModifier[mods] CLASS symbolName[name] OPEN_BLOCK classBody[body] CLOSE_BLOCK
+																	{ $$ = ClassDefinitionGrammarAction($mods, $name, $body); }
 	;
 
-expression: expression[left] ADD expression[right]					{ $$ = AdditionExpressionGrammarAction($left, $right); }
-	| expression[left] SUB expression[right]						{ $$ = SubtractionExpressionGrammarAction($left, $right); }
-	| expression[left] MUL expression[right]						{ $$ = MultiplicationExpressionGrammarAction($left, $right); }
-	| expression[left] DIV expression[right]						{ $$ = DivisionExpressionGrammarAction($left, $right); }
-	| factor														{ $$ = FactorExpressionGrammarAction($1); }
+classModifier: ABSTRACT												{ $$ = 1; }
+	| FINAL															{ $$ = 1; }
+	| /* lambda */													{ $$ = 0; }
 	;
 
-factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS				{ $$ = ExpressionFactorGrammarAction($2); }
-	| constant														{ $$ = ConstantFactorGrammarAction($1); }
-	| /* lambda (esto lo copié en la clase no estaba acá originalmente) */
+symbolName: SYMBOLNAME
 	;
 
-constant: INTEGER													{ $$ = IntegerConstantGrammarAction($1); }
+classBody: /* lambda */												{ $$ = 0; }
 	;
 
 %%

@@ -1,0 +1,11 @@
+@startuml
+
+class Potato {
+    
+}
+
+class Cabbage {
+    
+}
+
+@enduml

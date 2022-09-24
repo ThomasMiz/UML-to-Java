@@ -1,0 +1,11 @@
+@startuml
+
+abstract class Potato {
+    
+}
+
+final class Cabbage {
+    
+}
+
+@enduml

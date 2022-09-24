@@ -1,6 +1,7 @@
 #include "../../backend/support/logger.h"
 #include "flex-actions.h"
 #include <stdlib.h>
+#include <string.h>
 
 /**
  * Implementación de "flex-actions.h".
@@ -18,64 +19,50 @@
  * (mediante $1, $2, $3, etc.).
  */
 
-void BeginCommentPatternAction() {
-	LogDebug("BeginCommentPatternAction.");
+token StartUMLPatternAction() {
+	LogDebug("StartUMLPatternAction.");
+	yylval.token = STARTUML;
+	return STARTUML;
 }
 
-void EndCommentPatternAction() {
-	LogDebug("EndCommentPatternAction.");
+token EndUMLPatternAction() {
+	LogDebug("EndUMLPatternAction.");
+	yylval.token = ENDUML;
+	return ENDUML;
 }
 
-token AdditionOperatorPatternAction(const char * lexeme) {
-	LogDebug("AdditionOperatorPatternAction: '%s'.", lexeme);
-	yylval.token = ADD;
-	return ADD;
+token ClassPatternAction() {
+	LogDebug("ClassPatternAction.");
+	yylval.token = CLASS;
+	return CLASS;
 }
 
-token CloseParenthesisPatternAction(const char * lexeme) {
-	LogDebug("CloseParenthesisPatternAction: '%s'.", lexeme);
-	yylval.token = CLOSE_PARENTHESIS;
-	return CLOSE_PARENTHESIS;
+token AbstractPatternAction() {
+	LogDebug("AbstractPatternAction.");
+	yylval.token = ABSTRACT;
+	return ABSTRACT;
 }
 
-token DivisionOperatorPatternAction(const char * lexeme) {
-	LogDebug("DivisionOperatorPatternAction: '%s'.", lexeme);
-	yylval.token = DIV;
-	return DIV;
+token FinalPatternAction() {
+	LogDebug("FinalPatternAction.");
+	yylval.token = FINAL;
+	return FINAL;
 }
 
-token IntegerPatternAction(const char * lexeme, const int length) {
-	LogDebug("IntegerPatternAction: '%s' (length = %d).", lexeme, length);
-	yylval.integer = atoi(lexeme);
-	return INTEGER;
+token SymbolnamePatternAction(const char* lexeme, const int length) {
+	LogDebug("SymbolnamePatternAction.");
+	strncpy(yylval.symbolName, lexeme, sizeof(yylval.symbolName)-1);
+	return SYMBOLNAME;
 }
 
-token MultiplicationOperatorPatternAction(const char * lexeme) {
-	LogDebug("MultiplicationOperatorPatternAction: '%s'.", lexeme);
-	yylval.token = MUL;
-	return MUL;
+token OpenBlockPatternAction() {
+	LogDebug("OpenBlockPatternAction.");
+	yylval.token = OPEN_BLOCK;
+	return OPEN_BLOCK;
 }
 
-token OpenParenthesisPatternAction(const char * lexeme) {
-	LogDebug("OpenParenthesisPatternAction: '%s'.", lexeme);
-	yylval.token = OPEN_PARENTHESIS;
-	return OPEN_PARENTHESIS;
-}
-
-token SubtractionOperatorPatternAction(const char * lexeme) {
-	LogDebug("SubtractionOperatorPatternAction: '%s'.", lexeme);
-	yylval.token = SUB;
-	return SUB;
-}
-
-token UnknownPatternAction(const char * lexeme, const int length) {
-	LogDebug("UnknownPatternAction: '%s' (length = %d).", lexeme, length);
-	yylval.token = YYUNDEF;
-	// Al emitir este token, el compilador aborta la ejecución.
-	return YYUNDEF;
-}
-
-void IgnoredPatternAction(const char * lexeme, const int length) {
-	LogDebug("IgnoredPatternAction: '%s' (length = %d).", lexeme, length);
-	// Como no debe hacer nada con el patrón, solo se loguea en consola.
+token CloseBlockPatternAction() {
+	LogDebug("CloseBlockPatternAction.");
+	yylval.token = CLOSE_BLOCK;
+	return CLOSE_BLOCK;
 }

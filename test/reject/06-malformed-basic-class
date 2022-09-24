@@ -1,0 +1,15 @@
+@startuml
+
+class ThisIsFine {
+
+}
+
+@enduml
+
+@startuml
+
+class This Is Not Fine {
+    
+}
+
+@enduml

@@ -28,8 +28,8 @@ void yyerror(const char * string) {
 * indica que efectivamente el programa de entrada se pudo generar con esta
 * gramática, o lo que es lo mismo, que el programa pertenece al lenguaje.
 */
-int ProgramGrammarAction(const int value) {
-	LogDebug("\tProgramGrammarAction(%d)", value);
+int StartGrammarAction(const int uml) {
+	LogDebug("\tStartGrammarAction(%d)", uml);
 	/*
 	* "state" es una variable global que almacena el estado del compilador,
 	* cuyo campo "succeed" indica si la compilación fue o no exitosa, la cual
@@ -43,46 +43,21 @@ int ProgramGrammarAction(const int value) {
 	* la expresión se computa on-the-fly, y es la razón por la cual esta
 	* variable es un simple entero, en lugar de un nodo.
 	*/
-	state.result = value;
-	return value;
+	state.result = uml;
+	return state.result;
 }
 
-int AdditionExpressionGrammarAction(const int leftValue, const int rightValue) {
-	LogDebug("\tAdditionExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return Add(leftValue, rightValue);
+int UmlGrammarAction(const int body, const int uml) {
+	LogDebug("\tUmlGrammarAction(%d, %d)", body, uml);
+	return body + uml;
 }
 
-int SubtractionExpressionGrammarAction(const int leftValue, const int rightValue) {
-	LogDebug("\tSubtractionExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return Subtract(leftValue, rightValue);
+int UmlBodyGrammarAction(const int classDef, const int body) {
+	LogDebug("\tUmlBodyGrammarAction(%d, %d)", classDef, body);
+	return classDef + body;
 }
 
-int MultiplicationExpressionGrammarAction(const int leftValue, const int rightValue) {
-	LogDebug("\tMultiplicationExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return Multiply(leftValue, rightValue);
-}
-
-int DivisionExpressionGrammarAction(const int leftValue, const int rightValue) {
-	LogDebug("\tDivisionExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return Divide(leftValue, rightValue);
-}
-
-int FactorExpressionGrammarAction(const int value) {
-	LogDebug("\tFactorExpressionGrammarAction(%d)", value);
-	return value;
-}
-
-int ExpressionFactorGrammarAction(const int value) {
-	LogDebug("\tExpressionFactorGrammarAction(%d)", value);
-	return value;
-}
-
-int ConstantFactorGrammarAction(const int value) {
-	LogDebug("\tConstantFactorGrammarAction(%d)", value);
-	return value;
-}
-
-int IntegerConstantGrammarAction(const int value) {
-	LogDebug("\tIntegerConstantGrammarAction(%d)", value);
-	return value;
+int ClassDefinitionGrammarAction(const int classModifiers, const char* className, const int classBody) {
+	LogDebug("\tClassDefinitionGrammarAction(%d, %s, %d)", classModifiers, className, classBody);
+	return classModifiers + 1 + classBody;
 }

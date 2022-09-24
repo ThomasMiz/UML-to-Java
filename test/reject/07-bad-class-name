@@ -1,0 +1,15 @@
+@startuml
+
+class ThisIsFine {
+
+}
+
+@enduml
+
+@startuml
+
+class 0Zero {
+    
+}
+
+@enduml

@@ -1,0 +1,20 @@
+@startuml
+@enduml
+
+@startuml
+@enduml
+
+@startuml
+class Tengo { }
+class Hambre { }
+@enduml
+
+@startuml
+@enduml
+
+@startuml
+@enduml
+
+@startuml
+class HolaMundo { }
+@enduml

@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "calculator.h": "c",
+        "bison-parser.h": "c",
+        "flex-actions.h": "c",
+        "logger.h": "c",
+        "stdio.h": "c"
+    }
+}

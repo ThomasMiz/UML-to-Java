@@ -1,0 +1,7 @@
+@startuml
+class Hola {
+@enduml
+
+@startuml
+}
+@enduml

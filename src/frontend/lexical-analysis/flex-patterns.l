@@ -14,32 +14,32 @@
 %option yylineno
 
 /* Contextos de Flex. */
-%x COMMENT
+%x UML
+%x CLASS
 
 /* Patrones reutilizables. */
-digit			[0-9]
+accessModifier  [-+#~]
+symbolName      [a-zA-Z][a-zA-Z0-9_]*
 endline			[\n]
 whitespace		[ \f\n\r\t\v]
 
 %%
+"@startuml"									{ BEGIN(UML); return StartUMLPatternAction(); }
+"@enduml"                                   { return EndUMLPatternAction(); }
+.                                           { ; }
+{endline}                                   { ; }
 
-"/*"										{ BEGIN(COMMENT); BeginCommentPatternAction(); }
-<COMMENT>.									{ ; }
-<COMMENT>{endline}							{ ; }
-<COMMENT>"*/"								{ EndCommentPatternAction(); BEGIN(INITIAL); }
+<UML>{endline}                              { ; }
+<UML>{whitespace}                           { ; }
+<UML>"@enduml"								{ token t = EndUMLPatternAction(); BEGIN(INITIAL); return t;  }
 
-"+"											{ return AdditionOperatorPatternAction(yytext); }
-"-"											{ return SubtractionOperatorPatternAction(yytext); }
-"*"											{ return MultiplicationOperatorPatternAction(yytext); }
-"/"											{ return DivisionOperatorPatternAction(yytext); }
+<UML>"class"                                { return ClassPatternAction(); }
 
-"("											{ return OpenParenthesisPatternAction(yytext); }
-")"											{ return CloseParenthesisPatternAction(yytext); }
+<UML>"abstract"                             { return AbstractPatternAction(); }
+<UML>"final"                                { return FinalPatternAction(); }
 
-{digit}+									{ return IntegerPatternAction(yytext, yyleng); }
+<UML>{symbolName}                           { return SymbolnamePatternAction(yytext, yyleng); }
 
-{whitespace}								{ IgnoredPatternAction(yytext, yyleng); }
-
-.											{ return UnknownPatternAction(yytext, yyleng); }
-
+<UML>"{"                                    { return OpenBlockPatternAction(); }
+<UML>"}"                                    { return CloseBlockPatternAction(); }
 %%

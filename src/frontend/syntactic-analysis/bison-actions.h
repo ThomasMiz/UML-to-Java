@@ -12,20 +12,12 @@
  */
 
 // Programa.
-int ProgramGrammarAction(const int value);
+int StartGrammarAction(const int uml);
 
-// Expresión.
-int AdditionExpressionGrammarAction(const int leftValue, const int rightValue);
-int SubtractionExpressionGrammarAction(const int leftValue, const int rightValue);
-int MultiplicationExpressionGrammarAction(const int leftValue, const int rightValue);
-int DivisionExpressionGrammarAction(const int leftValue, const int rightValue);
-int FactorExpressionGrammarAction(const int value);
+int UmlGrammarAction(const int body, const int uml);
 
-// Factores.
-int ExpressionFactorGrammarAction(const int value);
-int ConstantFactorGrammarAction(const int value);
+int UmlBodyGrammarAction(const int classDef, const int body);
 
-// Constantes.
-int IntegerConstantGrammarAction(const int value);
+int ClassDefinitionGrammarAction(const int classModifiers, const char* className, const int classBody);
 
 #endif
