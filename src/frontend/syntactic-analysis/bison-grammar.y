@@ -108,8 +108,7 @@ umlBodyContent: ENDLINE												{ $$ = 0; }
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */
 
 classDefinition: classModifiers[mods] CLASS typeName[name] extends[ext] implements[imp]
-	OPEN_BLOCK classBody[body] CLOSE_BLOCK
-																	{ $$ = ClassDefinitionGrammarAction($mods, $name, $ext, $imp, $body); }
+	OPEN_BLOCK classBody[body] CLOSE_BLOCK							{ $$ = ClassDefinitionGrammarAction($mods, $name, $ext, $imp, $body); }
 	;
 
 interfaceDefinition: interfaceModifiers[mods] INTERFACE typeName[name] extends[ext] OPEN_BLOCK
