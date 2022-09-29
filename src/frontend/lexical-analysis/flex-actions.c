@@ -31,10 +31,44 @@ token EndUMLPatternAction() {
 	return ENDUML;
 }
 
+token EndlinePatternAction() {
+	LogDebug("EndlinePatternAction.");
+	yylval.token = ENDLINE;
+	return ENDLINE;
+}
+
+/* ---------------------------------------------------- */
+
 token ClassPatternAction() {
 	LogDebug("ClassPatternAction.");
 	yylval.token = CLASS;
 	return CLASS;
+}
+
+token InterfacePatternAction() {
+	LogDebug("InterfacePatternAction.");
+	yylval.token = INTERFACE;
+	return INTERFACE;
+}
+
+token ExtendsPatternAction() {
+	LogDebug("ExtendsPatternAction.");
+	yylval.token = EXTENDS;
+	return EXTENDS;
+}
+
+token ImplementsPatternAction() {
+	LogDebug("ImplementsPatternAction.");
+	yylval.token = IMPLEMENTS;
+	return IMPLEMENTS;
+}
+
+/* ---------------------------------------------------- */
+
+token StaticPatternAction() {
+	LogDebug("StaticPatternAction.");
+	yylval.token = STATIC;
+	return STATIC;
 }
 
 token AbstractPatternAction() {
@@ -49,11 +83,47 @@ token FinalPatternAction() {
 	return FINAL;
 }
 
+/* ---------------------------------------------------- */
+
+token DefaultPatternAction() {
+	LogDebug("DefaultPatternAction.");
+	yylval.token = DEFAULT;
+	return DEFAULT;
+}
+
+token PrivatePatternAction() {
+	LogDebug("PrivatePatternAction.");
+	yylval.token = PRIVATE;
+	return PRIVATE;
+}
+
+token ProtectedPatternAction() {
+	LogDebug("ProtectedPatternAction.");
+	yylval.token = PROTECTED;
+	return PROTECTED;
+}
+
+token PublicPatternAction() {
+	LogDebug("PublicPatternAction.");
+	yylval.token = PUBLIC;
+	return PUBLIC;
+}
+
+/* ---------------------------------------------------- */
+
 token SymbolnamePatternAction(const char* lexeme, const int length) {
 	LogDebug("SymbolnamePatternAction.");
 	strncpy(yylval.symbolName, lexeme, sizeof(yylval.symbolName)-1);
 	return SYMBOLNAME;
 }
+
+token CommaPatternAction() {
+	LogDebug("CommaPatternAction.");
+	yylval.token = COMMA;
+	return COMMA;
+}
+
+/* ---------------------------------------------------- */
 
 token OpenBlockPatternAction() {
 	LogDebug("OpenBlockPatternAction.");
@@ -66,3 +136,17 @@ token CloseBlockPatternAction() {
 	yylval.token = CLOSE_BLOCK;
 	return CLOSE_BLOCK;
 }
+
+token OpenParenthesisPatternAction() {
+	LogDebug("OpenParenthesisPatternAction.");
+	yylval.token = OPEN_PARENTHESIS;
+	return OPEN_PARENTHESIS;
+}
+
+token CloseParenthesisPatternAction() {
+	LogDebug("CloseParenthesisPatternAction.");
+	yylval.token = CLOSE_PARENTHESIS;
+	return CLOSE_PARENTHESIS;
+}
+
+/* ---------------------------------------------------- */

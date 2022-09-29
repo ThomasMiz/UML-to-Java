@@ -21,15 +21,38 @@
 
 token StartUMLPatternAction();
 token EndUMLPatternAction();
+token EndlinePatternAction();
+
+/* ---------------------------------------------------- */
 
 token ClassPatternAction();
+token InterfacePatternAction();
+token ExtendsPatternAction();
+token ImplementsPatternAction();
 
+/* ---------------------------------------------------- */
+
+token StaticPatternAction();
 token AbstractPatternAction();
 token FinalPatternAction();
 
+/* ---------------------------------------------------- */
+
+token DefaultPatternAction();
+token PrivatePatternAction();
+token ProtectedPatternAction();
+token PublicPatternAction();
+
+/* ---------------------------------------------------- */
+
 token SymbolnamePatternAction(const char* lexeme, const int length);
+token CommaPatternAction();
+
+/* ---------------------------------------------------- */
 
 token OpenBlockPatternAction();
 token CloseBlockPatternAction();
+token OpenParenthesisPatternAction();
+token CloseParenthesisPatternAction();
 
 #endif
