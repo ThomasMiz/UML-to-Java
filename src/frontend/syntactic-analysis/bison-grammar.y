@@ -60,7 +60,7 @@
 %type <string> interfaceDefinition
 %type <string> extends
 %type <string> implements
-%type <string> comaSeparatedTypenames
+%type <string> commaSeparatedTypenames
 %type <string> classBody
 %type <string> interfaceBody
 %type <string> classBodyContent
@@ -77,8 +77,8 @@
 %type <string> classMethodModifiers
 %type <string> interfaceMethodModifiers
 %type <string> accessModifier
-%type <string> symbolName
-%type <string> typeName
+%type <symbolName> symbolName
+%type <symbolName> typeName
 
 
 // Reglas de asociatividad y precedencia (de menor a mayor).
@@ -92,15 +92,15 @@
 start: uml															{ $$ = StartGrammarAction($1); }
 	;
 
-uml: STARTUML umlBody[body] ENDUML uml[nextUml]						{ $$ = $1 + $2 + $3 + $4; }
+uml: STARTUML umlBody[body] ENDUML uml[nextUml]						{ $$ = UmlGrammarAction($body, $nextUml); }
 	| /* lambda */													{ $$ = 0; }
 	;
 
-umlBody: umlBodyContent[bodyContent] umlBody[body]					{ $$ = $1 + $2; }
+umlBody: umlBodyContent[bodyContent] umlBody[nextBody]				{ $$ = UmlBodyGrammarAction($bodyContent, $nextBody); }
 	| /* lambda */													{ $$ = 0; }
 	;
 
-umlBodyContent: ENDLINE												{ $$ = $1; }
+umlBodyContent: ENDLINE												{ $$ = 0; }
 	| classDefinition												{ $$ = $1; }
 	| interfaceDefinition											{ $$ = $1; }
 	;
@@ -109,107 +109,118 @@ umlBodyContent: ENDLINE												{ $$ = $1; }
 
 classDefinition: classModifiers[mods] CLASS typeName[name] extends[ext] implements[imp]
 	OPEN_BLOCK classBody[body] CLOSE_BLOCK
-																	{ $$ = $1+$2+$3+$4+$5+$6+$7+$8; }
+																	{ $$ = ClassDefinitionGrammarAction($mods, $name, $ext, $imp, $body); }
 	;
 
 interfaceDefinition: interfaceModifiers[mods] INTERFACE typeName[name] extends[ext] OPEN_BLOCK
 	interfaceBody[body] CLOSE_BLOCK
-																	{ $$ = $1+$2+$3+$4+$5+$6+$7; }
+																	{ $$ = InterfaceDefinitionGrammarAction($mods, $name, $ext, $body); }
 	;
 
-extends: EXTENDS typeName											{ $$ = $1 + $2; }
+extends: EXTENDS typeName[type]										{ $$ = ExtendsGrammarAction($type); }
 	| /* lambda */													{ $$ = 0; }
 	;
 
-implements: IMPLEMENTS comaSeparatedTypenames						{ $$ = $1 + $2; } 
+implements: IMPLEMENTS commaSeparatedTypenames[types]				{ $$ = ImplementsGrammarAction($types); } 
 	| /* lambda */													{ $$ = 0; }
 	;
 
-comaSeparatedTypenames: typeName									{ $$ = $1; }
-	| typeName COMMA comaSeparatedTypenames							{ $$ = $1 + $2 + $3; }
+commaSeparatedTypenames: typeName[type]								{ $$ = CommaSeparatedTypenameGrammarAction($type); }
+	| typeName[type] COMMA commaSeparatedTypenames[next]			{ $$ = CommaSeparatedTypenamesGrammarAction($type, $next); }
 	;
 
-classBody: classBodyContent classBody								{ $$ = $1 + $2; }
+classBody: classBodyContent[content] classBody[next]				{ $$ = ClassBodyGrammarAction($content, $next); }
 	| /* lambda */													{ $$ = 0; }
 	;
 
-interfaceBody: interfaceBodyContent interfaceBody 					{ $$ = $1 + $2; }
+interfaceBody: interfaceBodyContent[content] interfaceBody[next]	{ $$ = InterfaceBodyGrammarAction($content, $next); }
 	| /* lambda */													{ $$ = 0; }
 	;
 
-classBodyContent: classMethod | classVariable | ENDLINE ;
+classBodyContent: classMethod										{ $$ = $1; }
+	| classVariable													{ $$ = $1; }
+	| ENDLINE														{ $$ = 0; }
+	;
 
-interfaceBodyContent: interfaceMethod | interfaceVariable | ENDLINE ;
+interfaceBodyContent: interfaceMethod								{ $$ = $1; }
+	| interfaceVariable												{ $$ = $1; }
+	| ENDLINE														{ $$ = 0; }
+	;
 
-classModifiers: accessModifier ABSTRACT								{ $$ = $1 + $2; }
-	| accessModifier FINAL											{ $$ = $1 + $2; }
+classModifiers: accessModifier ABSTRACT								{ $$ = $1 + AbstractGrammarAction(); }
+	| accessModifier FINAL											{ $$ = $1 + FinalGrammarAction(); }
 	| accessModifier												{ $$ = $1; }
 	;
 
-interfaceModifiers: accessModifier ABSTRACT							{ $$ = $1 + $2; }
+interfaceModifiers: accessModifier ABSTRACT							{ $$ = $1 + AbstractGrammarAction(); }
 	| accessModifier												{ $$ = $1; }
 	;
 
 /* -V-------------------------------------- Methods --------------------------------------V- */
 
-classMethod: classMethodModifiers typeName symbolName OPEN_PARENTHESIS parameterList CLOSE_PARENTHESIS ENDLINE
-																	{ $$ = $1+$2+$3+$4+$5+$6; }
+classMethod: classMethodModifiers[mods] typeName[type] symbolName[name] OPEN_PARENTHESIS
+	parameterList[params] CLOSE_PARENTHESIS ENDLINE
+																	{ $$ = ClassMethodGrammarAction($mods, $type, $name, $params); }
+	;
 
-interfaceMethod: interfaceMethodModifiers typeName symbolName OPEN_PARENTHESIS parameterList CLOSE_PARENTHESIS ENDLINE
-																	{ $$ = $1+$2+$3+$4+$5+$6; }
+interfaceMethod: interfaceMethodModifiers[mods] typeName[type] symbolName[name] OPEN_PARENTHESIS
+	parameterList[params] CLOSE_PARENTHESIS ENDLINE
+																	{ $$ = InterfaceMethodGrammarAction($mods, $type, $name, $params); }
+	;
 
-parameterList: typeName[type] symbolName[name]						{ $$ = $1 + $2; }
-	| typeName[type] symbolName[name] COMMA parameterList			{ $$ = $1 + $2 + $3 + $4; }
+parameterList: typeName[type] symbolName[name]						{ $$ = ParameterGrammarAction($type, $name); }
+	| typeName[type] symbolName[name] COMMA parameterList[next]		{ $$ = ParameterListGrammarAction($type, $name, $next); }
 	| /* lambda */													{ $$ = 0; }
 	;
 
 /* -V-------------------------------------- Variables --------------------------------------V- */
 
-classVariable: classVariableModifiers typeName symbolName ENDLINE	{ $$ = $1 + $2 + $3; }
+classVariable: classVariableModifiers[mods] typeName[type] symbolName[name] ENDLINE
+																	{ $$ = ClassVariableGrammarAction($mods, $type, $name); }
 	;
 
-interfaceVariable: interfaceVariableModifiers typeName symbolName ENDLINE
-																	{ $$ = $1 + $2 + $3; }
+interfaceVariable: interfaceVariableModifiers[mods] typeName[type] symbolName[name] ENDLINE
+																	{ $$ = InterfaceVariableGrammarAction($mods, $type, $name); }
 	;
 
-classVariableModifiers: accessModifier FINAL						{ $$ = $1 + $2; }
-	| accessModifier STATIC											{ $$ = $1 + $2; }
+classVariableModifiers: accessModifier FINAL						{ $$ = $1 + FinalGrammarAction(); }
+	| accessModifier STATIC											{ $$ = $1 + StaticGrammarAction(); }
 	| accessModifier												{ $$ = $1; }
 	;
 
 // Solamente podemos tener variables de tipo static en una interfaz */
-interfaceVariableModifiers: STATIC 									{ $$ = $1; }
-	| STATIC FINAL 													{ $$ = $1 + $2; }
-	| FINAL STATIC 													{ $$ = $1 + $2; }
+interfaceVariableModifiers: STATIC 									{ $$ = StaticGrammarAction(); }
+	| STATIC FINAL 													{ $$ = StaticGrammarAction() + FinalGrammarAction(); }
+	| FINAL STATIC 													{ $$ = FinalGrammarAction() + StaticGrammarAction(); }
 	;
 
-classMethodModifiers: accessModifier FINAL 							{ $$ = $1 + $2; }
-	| accessModifier ABSTRACT 										{ $$ = $1 + $2; }
-	| accessModifier STATIC 										{ $$ = $1 + $2; }
+classMethodModifiers: accessModifier FINAL 							{ $$ = $1 + FinalGrammarAction(); }
+	| accessModifier ABSTRACT 										{ $$ = $1 + AbstractGrammarAction(); }
+	| accessModifier STATIC 										{ $$ = $1 + StaticGrammarAction(); }
 	| accessModifier 												{ $$ = $1; }
 	;
 
-interfaceMethodModifiers: PUBLIC 									{ $$ = $1; }
-	| ABSTRACT 														{ $$ = $1; }
-	| STATIC 														{ $$ = $1; }
-	| PUBLIC ABSTRACT 												{ $$ = $1 + $2; }
-	| PUBLIC STATIC 												{ $$ = $1 + $2; }
+interfaceMethodModifiers: PUBLIC 									{ $$ = PublicGrammarAction(); }
+	| ABSTRACT 														{ $$ = AbstractGrammarAction(); }
+	| STATIC 														{ $$ = StaticGrammarAction(); }
+	| PUBLIC ABSTRACT 												{ $$ = PublicGrammarAction() + AbstractGrammarAction(); }
+	| PUBLIC STATIC 												{ $$ = PublicGrammarAction() + StaticGrammarAction(); }
 	| /* lambda */ 													{ $$ = 0; }
 	;
 
 /* -V-------------------------------------- General --------------------------------------V- */
 
-accessModifier: DEFAULT 											{ $$ = $1; }
-	| PRIVATE 														{ $$ = $1; }
-	| PROTECTED 													{ $$ = $1; }
-	| PUBLIC														{ $$ = $1; }
+accessModifier: DEFAULT 											{ $$ = DefaultGrammarAction(); }
+	| PRIVATE 														{ $$ = PrivateGrammarAction(); }
+	| PROTECTED 													{ $$ = ProtectedGrammarAction(); }
+	| PUBLIC														{ $$ = PublicGrammarAction(); }
 	| /* lambda */													{ $$ = 0; }
 	;
 
-symbolName: SYMBOLNAME 												{ $$ = 1; }
+symbolName: SYMBOLNAME
 	;
 
-typeName: SYMBOLNAME												{ $$ = 1; }
+typeName: SYMBOLNAME
 	;
 
 %%
