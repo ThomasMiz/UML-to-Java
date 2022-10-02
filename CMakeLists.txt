@@ -8,7 +8,7 @@ project(Compiler C)
 # Compilar el parser con Bison, generando contra-ejemplos en caso de que se presenten conflictos.
 add_custom_command(
 	OUTPUT ../src/frontend/syntactic-analysis/bison-parser.c ../src/frontend/syntactic-analysis/bison-parser.h
-	COMMAND bison -Wcounterexamples -d ../src/frontend/syntactic-analysis/bison-grammar.y -o ../src/frontend/syntactic-analysis/bison-parser.c)
+	COMMAND bison -Wcounterexamples -Wcex -d ../src/frontend/syntactic-analysis/bison-grammar.y -o ../src/frontend/syntactic-analysis/bison-parser.c)
 
 # Seleccionar estrategia según el compilador de C disponible en el sistema.
 # @see https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html
@@ -40,6 +40,18 @@ elseif (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 
 elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	message(NOTICE "El compilador de C es LLVM Clang.")
+
+	# Opciones para Clang.
+	# add_compile_options(...)
+
+	# Compilar el scanner con Flex.
+	add_custom_command(
+		OUTPUT ../src/frontend/lexical-analysis/flex-scanner.c
+		COMMAND flex -o ../src/frontend/lexical-analysis/flex-scanner.c ../src/frontend/lexical-analysis/flex-patterns.l
+		DEPENDS ../src/frontend/syntactic-analysis/bison-parser.c ../src/frontend/syntactic-analysis/bison-parser.h)
+
+		elseif (CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
+	message(NOTICE "El compilador de C es Apple Clang.")
 
 	# Opciones para Clang.
 	# add_compile_options(...)

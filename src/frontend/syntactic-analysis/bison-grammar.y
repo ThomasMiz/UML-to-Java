@@ -97,7 +97,7 @@ uml: STARTUML umlBody[body] ENDUML uml[nextUml]						{ $$ = UmlGrammarAction($bo
 	;
 
 umlBody: umlBodyContent[bodyContent] umlBody[nextBody]				{ $$ = UmlBodyGrammarAction($bodyContent, $nextBody); }
-	| /* lambda */													{ $$ = 0; }
+	| umlBodyContent												{ $$ = 0; }
 	;
 
 umlBodyContent: ENDLINE												{ $$ = 0; }
@@ -136,8 +136,8 @@ interfaceBody: interfaceBodyContent[content] interfaceBody[next]	{ $$ = Interfac
 	| /* lambda */													{ $$ = 0; }
 	;
 
-classBodyContent: classMethod										{ $$ = $1; }
-	| classVariable													{ $$ = $1; }
+classBodyContent: accessModifier classMethod										{ $$ = $1; }
+	| accessModifier classVariable													{ $$ = $1; }
 	| ENDLINE														{ $$ = 0; }
 	;
 
@@ -182,9 +182,9 @@ interfaceVariable: interfaceVariableModifiers[mods] typeName[type] symbolName[na
 																	{ $$ = InterfaceVariableGrammarAction($mods, $type, $name); }
 	;
 
-classVariableModifiers: accessModifier FINAL						{ $$ = $1 + FinalGrammarAction(); }
-	| accessModifier STATIC											{ $$ = $1 + StaticGrammarAction(); }
-	| accessModifier												{ $$ = $1; }
+classVariableModifiers: FINAL						{ $$ = $1 + FinalGrammarAction(); }
+	| STATIC											{ $$ = $1 + StaticGrammarAction(); }
+	| /* lambda */												{ $$ = 0; }
 	;
 
 // Solamente podemos tener variables de tipo static en una interfaz */
@@ -193,10 +193,10 @@ interfaceVariableModifiers: STATIC 									{ $$ = StaticGrammarAction(); }
 	| FINAL STATIC 													{ $$ = FinalGrammarAction() + StaticGrammarAction(); }
 	;
 
-classMethodModifiers: accessModifier FINAL 							{ $$ = $1 + FinalGrammarAction(); }
-	| accessModifier ABSTRACT 										{ $$ = $1 + AbstractGrammarAction(); }
-	| accessModifier STATIC 										{ $$ = $1 + StaticGrammarAction(); }
-	| accessModifier 												{ $$ = $1; }
+classMethodModifiers: FINAL 							{ $$ = $1 + FinalGrammarAction(); }
+	| ABSTRACT 										{ $$ = $1 + AbstractGrammarAction(); }
+	| STATIC 										{ $$ = $1 + StaticGrammarAction(); }
+	| /* lambda */ 												{ $$ = 0; }
 	;
 
 interfaceMethodModifiers: PUBLIC 									{ $$ = PublicGrammarAction(); }
