@@ -12,7 +12,7 @@ extern FILE * yyout;
 
 // La cantidad de caracteres en el lexema "yytext". Se debe leer en las
 // acciones de Flex, no en Bison.
-extern size_t yyleng;
+extern int yyleng;
 
 // Variable global que contiene el número de la línea analizada.
 extern int yylineno;

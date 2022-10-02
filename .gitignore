@@ -7,6 +7,7 @@ log/
 obj/
 node_modules/
 build/
+.vscode/
 
 # Files:
 *.csproj.user
