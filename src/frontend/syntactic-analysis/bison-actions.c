@@ -89,8 +89,13 @@ int ClassBodyContentGrammarAction(const int acc, const int elem) {
 	return acc + elem;
 }
 
+int ClassConstructorGrammarAction(const int name, const int params) {
+	LogDebug("\tClassConstructorGrammarAction(%d, %d)", name, params);
+	return name + params;
+}
+
 int ClassElementGrammarAction(const int mods, const int type, const int name, const int params) {
-	LogDebug("\tClassBodyContentGrammarAction(%d, %d, %d, %d)", mods, type, name, params);
+	LogDebug("\tClassElementGrammarAction(%d, %d, %d, %d)", mods, type, name, params);
 	return mods + type + name + params;
 }
 

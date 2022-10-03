@@ -1,0 +1,15 @@
+@startuml
+
+abstract class Empanada<Humita> {
+    Empanada()
+    Empanada(Int hola, int chau)
+    Empanadas(Pedro pedrito)
+}
+
+class Brownie<Loco> {
+    Brauni()
+    Brauni(Int<List<Object>> hola, int chau)
+    Brauni(Pedro<Capo> pedrito)
+}
+
+@enduml

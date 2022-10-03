@@ -62,10 +62,13 @@
 %type <string> interfaceDefinition
 %type <string> extends
 %type <string> implements
-%type <string> commaSeparatedTypenames
 %type <string> classBody
 %type <string> classBodyContent
 %type <string> classElement
+%type <string> abstractClassDefinition
+%type <string> abstractClassBody
+%type <string> abstractClassBodyContent
+%type <string> abstractClassElement
 %type <string> interfaceBody
 %type <string> interfaceBodyContent
 %type <string> interfaceMethodOrVariableModifiers
@@ -78,10 +81,7 @@
 %type <string> accessModifier
 %type <string> symbolName
 %type <string> typeName
-%type <string> abstractClassDefinition
-%type <string> abstractClassBody
-%type <string> abstractClassElement
-%type <string> abstractClassBodyContent
+%type <string> commaSeparatedTypenames
 
 
 // Reglas de asociatividad y precedencia (de menor a mayor).
@@ -136,7 +136,9 @@ classBodyContent: accessModifier[acc] classElement[elem] ENDLINE	{ $$ = ClassBod
 	| ENDLINE														{ $$ = 0; }
 	;
 
-classElement: classMethodOrVariableModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params]
+classElement: symbolName[name] methodParams[params]					{ $$ = ClassConstructorGrammarAction($name, $params); }
+	| typeName[type] symbolName[name] maybeMethodParams[params]		{ $$ = ClassElementGrammarAction(0, $type, $name, $params); }
+	| classMethodOrVariableModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params); }
 	;
 
@@ -154,7 +156,9 @@ abstractClassBodyContent: accessModifier[acc] abstractClassElement[elem] ENDLINE
     | ENDLINE														{ $$ = 0; }
 	;
 
-abstractClassElement: classMethodOrVariableModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params]
+abstractClassElement: symbolName[name] methodParams[params]			{ $$ = 0; }
+	| typeName[type] symbolName[name] maybeMethodParams[params]		{ $$ = 0; }
+	| classMethodOrVariableModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params); }
 	| classAbstractMethodModifier[mods] typeName[type] symbolName[name] methodParams[params]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params); }
@@ -198,7 +202,6 @@ classMethodOrVariableModifiers: OPEN_BLOCK STATIC CLOSE_BLOCK		{ $$ = FinalGramm
 	| FINAL															{ $$ = StaticGrammarAction(); }
 	| OPEN_BLOCK STATIC CLOSE_BLOCK FINAL							{ $$ = StaticGrammarAction() + FinalGrammarAction(); }
 	| FINAL OPEN_BLOCK STATIC CLOSE_BLOCK							{ $$ = FinalGrammarAction() + StaticGrammarAction(); }
-	| /* lambda */													{ $$ = 0; }
 	;
 
 /* -V-------------------------------------- General --------------------------------------V- */
