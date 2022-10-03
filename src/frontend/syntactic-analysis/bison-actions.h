@@ -22,8 +22,6 @@ int ClassDefinitionGrammarAction(const int name, const int ext, const int imp, c
 int InterfaceDefinitionGrammarAction(const int name, const int ext, const int body);
 int ExtendsGrammarAction(const int type);
 int ImplementsGrammarAction(const int commaSeparatedTypenames);
-int CommaSeparatedTypenameGrammarAction(const int type);
-int CommaSeparatedTypenamesGrammarAction(const int type, const int next);
 int ClassBodyGrammarAction(const int content, const int next);
 int ClassBodyContentGrammarAction(const int acc, const int elem);
 int ClassElementGrammarAction(const int mods, const int type, const int name, const int params);
@@ -53,6 +51,10 @@ int FinalGrammarAction();
 /* -V-------------------------------------- Misc --------------------------------------V- */
 
 int SymbolnameGrammarAction(const char* symbol);
-int TypenameGrammarAction(const char* type);
+int GenericTypenameGrammarAction(const int type);
+int TypenameGrammarAction(const char* name);
+int GenericTypenameGrammarAction(const char* name, const int genericType);
+int CommaSeparatedTypenameGrammarAction(const int type);
+int CommaSeparatedTypenamesGrammarAction(const int type, const int next);
 
 #endif

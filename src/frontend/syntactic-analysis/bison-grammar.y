@@ -213,12 +213,14 @@ accessModifier: DEFAULT 											{ $$ = DefaultGrammarAction(); }
 symbolName: SYMBOLNAME[symbol]										{ $$ = SymbolnameGrammarAction($symbol); }
 	;
 
-typeName: SYMBOLNAME[type]											{ $$ = TypenameGrammarAction($type); }
-	| OPEN_GENERIC commaSeparatedTypenames[type] CLOSE_GENERIC		{ $$ = TypenameGrammarAction($type); }
+typeName: SYMBOLNAME[name]											{ $$ = TypenameGrammarAction($name); }
+	| SYMBOLNAME[name] OPEN_GENERIC commaSeparatedTypenames[genericType] CLOSE_GENERIC
+																	{ $$ = GenericTypenameGrammarAction($name, $genericType); }
 	;
 
-commaSeparatedTypenames: typeName[type]								{ $$ = CommaSeparatedTypenameGrammarAction($type); }
-	| typeName[type] COMMA commaSeparatedTypenames[next]			{ $$ = CommaSeparatedTypenamesGrammarAction($type, $next); }
+commaSeparatedTypenames: typeName[type] COMMA commaSeparatedTypenames[next]
+																	{ $$ = CommaSeparatedTypenamesGrammarAction($type, $next); }
+	| typeName[type]												{ $$ = CommaSeparatedTypenameGrammarAction($type); }
 	;
 
 %%

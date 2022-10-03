@@ -1,0 +1,12 @@
+@startuml
+
+abstract class Empanada {
+    # {static} final List<Integer> constante
+    + {abstract} void hola()
+    {abstract} void quetal()
+    ~ {static} void soyEstatico()
+    {static} final void soyFaina()
+    + {static} Function<Boolean,Boolean> variableEstatic
+}
+
+@enduml

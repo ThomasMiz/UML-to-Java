@@ -1,0 +1,7 @@
+@startuml
+
+class Tomate {
+    LA<A<A, A, A<A<A<A, A<A>, A>>>>, A<A, A<A<A, A, A>, A, A>> uff
+}
+
+@enduml

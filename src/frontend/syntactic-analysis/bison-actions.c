@@ -79,16 +79,6 @@ int ImplementsGrammarAction(const int commaSeparatedTypenames) {
 	return commaSeparatedTypenames;
 }
 
-int CommaSeparatedTypenameGrammarAction(const int type) {
-	LogDebug("\tCommaSeparatedTypenameGrammarAction(%d)", type);
-	return type;
-}
-
-int CommaSeparatedTypenamesGrammarAction(const int type, const int next) {
-	LogDebug("\tCommaSeparatedTypenamesGrammarAction(%d, %d)", type, next);
-	return type + next;
-}
-
 int ClassBodyGrammarAction(const int content, const int next) {
 	LogDebug("\tClassBodyGrammarAction(%d, %d)", content, next);
 	return content + next;
@@ -193,7 +183,22 @@ int SymbolnameGrammarAction(const char* symbol) {
 	return 1;
 }
 
-int TypenameGrammarAction(const char* type) {
-	LogDebug("\tTypenameGrammarAction(%s)", type);
+int TypenameGrammarAction(const char* name) {
+	LogDebug("\tTypenameGrammarAction(%s)", name);
 	return 1;
+}
+
+int GenericTypenameGrammarAction(const char* name, const int genericType) {
+	LogDebug("\tGenericTypenameGrammarAction(%s, %d)", name, genericType);
+	return 1 + genericType;
+}
+
+int CommaSeparatedTypenameGrammarAction(const int type) {
+	LogDebug("\tCommaSeparatedTypenameGrammarAction(%d)", type);
+	return type;
+}
+
+int CommaSeparatedTypenamesGrammarAction(const int type, const int next) {
+	LogDebug("\tCommaSeparatedTypenamesGrammarAction(%d, %d)", type, next);
+	return type + next;
 }

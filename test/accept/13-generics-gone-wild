@@ -1,0 +1,8 @@
+@startuml
+
+class QuieroMasFeriados {
+    A<A<A, A, A<A<A<A, A<A>, A>>>>, A<A, A<A<A, A, A>, A, A>>> uff
+    A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A>, A<A>>>>>>>>>>>>>>>>>>>>>, A, A, A, A<A, A<A<A<A>>>>> que
+}
+
+@enduml
