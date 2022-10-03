@@ -59,19 +59,19 @@ int UmlBodyGrammarAction(const int classDef, const int body) {
 
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */
 
-int ClassDefinitionGrammarAction(const int mods, const char* name, const int ext, const int imp, const int body) {
-	LogDebug("\tClassDefinitionGrammarAction(%d, %s, %d, %d, %d)", mods, name, ext, imp, body);
-	return mods + 1 + ext + imp + body;
+int ClassDefinitionGrammarAction(const int name, const int ext, const int imp, const int body) {
+	LogDebug("\tClassDefinitionGrammarAction(%d, %d, %d, %d)", name, ext, imp, body);
+	return name + ext + imp + body;
 }
 
-int InterfaceDefinitionGrammarAction(const int mods, const char* name, const int ext, const int body) {
-	LogDebug("\tInterfaceDefinitionGrammarAction(%d, %s, %d, %d)", mods, name, ext, body);
-	return mods + 1 + ext + body;
+int InterfaceDefinitionGrammarAction(const int name, const int ext, const int body) {
+	LogDebug("\tInterfaceDefinitionGrammarAction(%d, %d, %d)", name, ext, body);
+	return name + ext + body;
 }
 
-int ExtendsGrammarAction(const char* type) {
-	LogDebug("\tExtendsGrammarAction(%s)", type);
-	return 1;
+int ExtendsGrammarAction(const int type) {
+	LogDebug("\tExtendsGrammarAction(%d)", type);
+	return type;
 }
 
 int ImplementsGrammarAction(const int commaSeparatedTypenames) {
@@ -79,14 +79,14 @@ int ImplementsGrammarAction(const int commaSeparatedTypenames) {
 	return commaSeparatedTypenames;
 }
 
-int CommaSeparatedTypenameGrammarAction(const char* type) {
-	LogDebug("\tCommaSeparatedTypenameGrammarAction(%s)", type);
-	return 1;
+int CommaSeparatedTypenameGrammarAction(const int type) {
+	LogDebug("\tCommaSeparatedTypenameGrammarAction(%d)", type);
+	return type;
 }
 
-int CommaSeparatedTypenamesGrammarAction(const char* type, const int next) {
-	LogDebug("\tCommaSeparatedTypenamesGrammarAction(%s, %d)", type, next);
-	return 1 + next;
+int CommaSeparatedTypenamesGrammarAction(const int type, const int next) {
+	LogDebug("\tCommaSeparatedTypenamesGrammarAction(%d, %d)", type, next);
+	return type + next;
 }
 
 int ClassBodyGrammarAction(const int content, const int next) {
@@ -94,43 +94,63 @@ int ClassBodyGrammarAction(const int content, const int next) {
 	return content + next;
 }
 
+int ClassBodyContentGrammarAction(const int acc, const int elem) {
+	LogDebug("\tClassBodyContentGrammarAction(%d, %d)", acc, elem);
+	return acc + elem;
+}
+
+int ClassElementGrammarAction(const int mods, const int type, const int name, const int params) {
+	LogDebug("\tClassBodyContentGrammarAction(%d, %d, %d, %d)", mods, type, name, params);
+	return mods + type + name + params;
+}
+
 int InterfaceBodyGrammarAction(const int content, const int next) {
 	LogDebug("\tInterfaceBodyGrammarAction(%d, %d)", content, next);
 	return content + next;
 }
 
+int InterfaceBodyContentGrammarAction(const int mods, const int type, const int name, const int params) {
+	LogDebug("\tInterfaceBodyContentGrammarAction(%d, %d, %d, %d)", mods, type, name, params);
+	return mods + type + name + params;
+}
+
 /* -V-------------------------------------- Methods --------------------------------------V- */
 
-int ClassMethodGrammarAction(const int mods, const char* type, const char* name, const int params) {
-	LogDebug("\tClassMethodGrammarAction(%d, %s, %s, %d)", mods, type, name, params);
-	return mods + 1 + 1 + params;
+int ClassMethodGrammarAction(const int mods, const int type, const int name, const int params) {
+	LogDebug("\tClassMethodGrammarAction(%d, %d, %d, %d)", mods, type, name, params);
+	return mods + type + name + params;
 }
 
-int InterfaceMethodGrammarAction(const int mods, const char* type, const char* name, const int params) {
-	LogDebug("\tInterfaceMethodGrammarAction(%d, %s, %s, %d)", mods, type, name, params);
-	return mods + 1 + 1 + params;
+int InterfaceMethodGrammarAction(const int mods, const int type, const int name, const int params) {
+	LogDebug("\tInterfaceMethodGrammarAction(%d, %d, %d, %d)", mods, type, name, params);
+	return mods + type + name + params;
 }
 
-int ParameterGrammarAction(const char* type, const char* name) {
-	LogDebug("\tParameterGrammarAction(%s, %s)", type, name);
-	return 1 + 1;
+int MethodParamsGrammarAction(const int paramList) {
+	LogDebug("\tMethodParamsGrammarAction(%d)", paramList);
+	return paramList;
 }
 
-int ParameterListGrammarAction(const char* type, const char* name, const int next) {
-	LogDebug("\tParameterListGrammarAction(%s, %s, %d)", type, name, next);
-	return 1 + 1 + next;
+int ParameterGrammarAction(const int type, const int name) {
+	LogDebug("\tParameterGrammarAction(%d, %d)", type, name);
+	return type + name;
+}
+
+int ParameterListGrammarAction(const int type, const int name, const int next) {
+	LogDebug("\tParameterListGrammarAction(%d, %d, %d)", type, name, next);
+	return type + name + next;
 }
 
 /* -V-------------------------------------- Variables --------------------------------------V- */
 
-int ClassVariableGrammarAction(const int mods, const char* type, const char* name) {
-	LogDebug("\tClassVariableGrammarAction(%d, %s, %s)", mods, type, name);
-	return mods + 1 + 1;
+int ClassVariableGrammarAction(const int mods, const int type, const int name) {
+	LogDebug("\tClassVariableGrammarAction(%d, %d, %d)", mods, type, name);
+	return mods + type + name;
 }
 
-int InterfaceVariableGrammarAction(const int mods, const char* type, const char* name) {
-	LogDebug("\tInterfaceVariableGrammarAction(%d, %s, %s)", mods, type, name);
-	return mods + 1 + 1;
+int InterfaceVariableGrammarAction(const int mods, const int type, const int name) {
+	LogDebug("\tInterfaceVariableGrammarAction(%d, %d, %d)", mods, type, name);
+	return mods + type + name;
 }
 
 int DefaultGrammarAction() {
@@ -165,5 +185,15 @@ int StaticGrammarAction() {
 
 int FinalGrammarAction() {
 	LogDebug("\tFinalGrammarAction()");
+	return 1;
+}
+
+int SymbolnameGrammarAction(const char* symbol) {
+	LogDebug("\tSymbolnameGrammarAction(%s)", symbol);
+	return 1;
+}
+
+int TypenameGrammarAction(const char* type) {
+	LogDebug("\tTypenameGrammarAction(%s)", type);
 	return 1;
 }

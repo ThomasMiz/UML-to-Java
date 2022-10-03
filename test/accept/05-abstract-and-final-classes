@@ -1,10 +1,10 @@
 @startuml
 
-abstract class Potato {
+class Potato {
     
 }
 
-final class Cabbage {
+class Cabbage {
     
 }
 

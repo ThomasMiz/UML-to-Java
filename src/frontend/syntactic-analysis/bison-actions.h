@@ -18,26 +18,30 @@ int UmlBodyGrammarAction(const int classDef, const int body);
 
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */
 
-int ClassDefinitionGrammarAction(const int mods, const char* name, const int ext, const int imp, const int body);
-int InterfaceDefinitionGrammarAction(const int mods, const char* name, const int ext, const int body);
-int ExtendsGrammarAction(const char* type);
+int ClassDefinitionGrammarAction(const int name, const int ext, const int imp, const int body);
+int InterfaceDefinitionGrammarAction(const int name, const int ext, const int body);
+int ExtendsGrammarAction(const int type);
 int ImplementsGrammarAction(const int commaSeparatedTypenames);
-int CommaSeparatedTypenameGrammarAction(const char* type);
-int CommaSeparatedTypenamesGrammarAction(const char* type, const int next);
+int CommaSeparatedTypenameGrammarAction(const int type);
+int CommaSeparatedTypenamesGrammarAction(const int type, const int next);
 int ClassBodyGrammarAction(const int content, const int next);
+int ClassBodyContentGrammarAction(const int acc, const int elem);
+int ClassElementGrammarAction(const int mods, const int type, const int name, const int params);
 int InterfaceBodyGrammarAction(const int content, const int next);
+int InterfaceBodyContentGrammarAction(const int mods, const int type, const int name, const int params);
 
 /* -V-------------------------------------- Methods --------------------------------------V- */
 
-int ClassMethodGrammarAction(const int mods, const char* type, const char* name, const int params);
-int InterfaceMethodGrammarAction(const int mods, const char* type, const char* name, const int params);
-int ParameterGrammarAction(const char* type, const char* name);
-int ParameterListGrammarAction(const char* type, const char* name, const int next);
+int ClassMethodGrammarAction(const int mods, const int type, const int name, const int params);
+int InterfaceMethodGrammarAction(const int mods, const int type, const int name, const int params);
+int MethodParamsGrammarAction(const int paramList);
+int ParameterGrammarAction(const int type, const int name);
+int ParameterListGrammarAction(const int type, const int name, const int next);
 
 /* -V-------------------------------------- Variables --------------------------------------V- */
 
-int ClassVariableGrammarAction(const int mods, const char* type, const char* name);
-int InterfaceVariableGrammarAction(const int mods, const char* type, const char* name);
+int ClassVariableGrammarAction(const int mods, const int type, const int name);
+int InterfaceVariableGrammarAction(const int mods, const int type, const int name);
 int DefaultGrammarAction();
 int PrivateGrammarAction();
 int ProtectedGrammarAction();
@@ -45,5 +49,10 @@ int PublicGrammarAction();
 int AbstractGrammarAction();
 int StaticGrammarAction();
 int FinalGrammarAction();
+
+/* -V-------------------------------------- Misc --------------------------------------V- */
+
+int SymbolnameGrammarAction(const char* symbol);
+int TypenameGrammarAction(const char* type);
 
 #endif

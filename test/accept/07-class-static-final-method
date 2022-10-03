@@ -1,0 +1,10 @@
+@startuml
+
+class Empanada {
+    {static} void hola()
+    final void como()
+    {static} final void estas()
+    final {static} void yogur()
+}
+
+@enduml
