@@ -1,0 +1,7 @@
+@startuml
+
+abstract class Empanada {
+    {abstract} static ArrayList hola()
+}
+
+@enduml

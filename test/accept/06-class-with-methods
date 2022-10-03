@@ -2,14 +2,14 @@
 
 class Potato {
     void hola()
-    int como()
-    ArrayList estas()
+    + int como()
+    ~ ArrayList estas()
 }
 
 class Cabbage {
-    void chau()
+    # void chau()
     String adios()
-    ArrayList HastaPronto()
+    - ArrayList HastaPronto()
 }
 
 @enduml

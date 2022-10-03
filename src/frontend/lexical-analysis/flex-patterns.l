@@ -53,4 +53,7 @@ whitespace		[ \f\n\r\t\v]
 <UML>"}"                                    { return CloseBlockPatternAction(); }
 <UML>"("                                    { return OpenParenthesisPatternAction(); }
 <UML>")"                                    { return CloseParenthesisPatternAction(); }
-%%
+<UML>"<"                                    { return OpenGenericPatternAction(); }
+<UML>">"                                    { return CloseGenericPatternAction(); }
+%% 
+

@@ -1,0 +1,7 @@
+@startuml
+
+class Empanada {
+    {abstract} int hola
+}
+
+@enduml

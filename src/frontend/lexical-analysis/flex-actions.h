@@ -54,5 +54,7 @@ token OpenBlockPatternAction();
 token CloseBlockPatternAction();
 token OpenParenthesisPatternAction();
 token CloseParenthesisPatternAction();
+token OpenGenericPatternAction();
+token CloseGenericPatternAction();
 
 #endif

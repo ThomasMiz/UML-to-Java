@@ -149,4 +149,16 @@ token CloseParenthesisPatternAction() {
 	return CLOSE_PARENTHESIS;
 }
 
+token OpenGenericPatternAction() {
+	LogDebug("OpenGenericPatternAction.");
+	yylval.token = OPEN_GENERIC;
+	return OPEN_GENERIC;
+}
+
+token CloseGenericPatternAction() {
+	LogDebug("CloseGenericPatternAction.");
+	yylval.token = CLOSE_GENERIC;
+	return CLOSE_GENERIC;
+}
+
 /* ---------------------------------------------------- */

@@ -48,6 +48,8 @@
 %token <token> CLOSE_BLOCK
 %token <token> OPEN_PARENTHESIS
 %token <token> CLOSE_PARENTHESIS
+%token <token> OPEN_GENERIC
+%token <token> CLOSE_GENERIC
 
 %token <symbolName> SYMBOLNAME
 
@@ -71,11 +73,15 @@
 %type <string> maybeMethodParams
 %type <string> methodParams
 %type <string> parameterList
-%type <string> classMethodOnlyModifiers
+%type <string> classAbstractMethodModifier
 %type <string> classMethodOrVariableModifiers
 %type <string> accessModifier
 %type <string> symbolName
 %type <string> typeName
+%type <string> abstractClassDefinition
+%type <string> abstractClassBody
+%type <string> abstractClassElement
+%type <string> abstractClassBodyContent
 
 
 // Reglas de asociatividad y precedencia (de menor a mayor).
@@ -100,6 +106,7 @@ umlBody: umlBodyContent[bodyContent] umlBody[nextBody]				{ $$ = UmlBodyGrammarA
 
 umlBodyContent: ENDLINE												{ $$ = 0; }
 	| classDefinition												{ $$ = $1; }
+	| abstractClassDefinition										{ $$ = $1; }
 	| interfaceDefinition											{ $$ = $1; }
 	;
 
@@ -121,10 +128,6 @@ implements: IMPLEMENTS commaSeparatedTypenames[types]				{ $$ = ImplementsGramma
 	| /* lambda */													{ $$ = 0; }
 	;
 
-commaSeparatedTypenames: typeName[type]								{ $$ = CommaSeparatedTypenameGrammarAction($type); }
-	| typeName[type] COMMA commaSeparatedTypenames[next]			{ $$ = CommaSeparatedTypenamesGrammarAction($type, $next); }
-	;
-
 classBody: classBodyContent[content] classBody[next]				{ $$ = ClassBodyGrammarAction($content, $next); }
 	| /* lambda */													{ $$ = 0; }
 	;
@@ -135,7 +138,25 @@ classBodyContent: accessModifier[acc] classElement[elem] ENDLINE	{ $$ = ClassBod
 
 classElement: classMethodOrVariableModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params); }
-	| classMethodOnlyModifiers[mods] typeName[type] symbolName[name] methodParams[params]
+	;
+
+abstractClassDefinition: ABSTRACT CLASS typeName[name] extends[ext] implements[imp] OPEN_BLOCK abstractClassBody[body] CLOSE_BLOCK 
+																	{ $$ = ClassDefinitionGrammarAction($name, $ext, $imp, $body); }
+	;
+
+abstractClassBody: abstractClassBodyContent[content]  abstractClassBody[next]
+																	{ $$ = ClassBodyGrammarAction($content, $next); }
+	| /* lambda */													{ $$ = 0; }
+	;
+
+abstractClassBodyContent: accessModifier[acc] abstractClassElement[elem] ENDLINE
+																	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
+    | ENDLINE														{ $$ = 0; }
+	;
+
+abstractClassElement: classMethodOrVariableModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params]
+																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params); }
+	| classAbstractMethodModifier[mods] typeName[type] symbolName[name] methodParams[params]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params); }
 	;
 
@@ -170,7 +191,7 @@ parameterList: typeName[type] symbolName[name]						{ $$ = ParameterGrammarActio
 	| /* lambda */													{ $$ = 0; }
 	;
 
-classMethodOnlyModifiers: OPEN_BLOCK ABSTRACT CLOSE_BLOCK			{ $$ = AbstractGrammarAction(); }
+classAbstractMethodModifier: OPEN_BLOCK ABSTRACT CLOSE_BLOCK		{ $$ = AbstractGrammarAction(); }
 	;
 
 classMethodOrVariableModifiers: OPEN_BLOCK STATIC CLOSE_BLOCK		{ $$ = FinalGrammarAction(); }
@@ -193,6 +214,11 @@ symbolName: SYMBOLNAME[symbol]										{ $$ = SymbolnameGrammarAction($symbol);
 	;
 
 typeName: SYMBOLNAME[type]											{ $$ = TypenameGrammarAction($type); }
+	| OPEN_GENERIC commaSeparatedTypenames[type] CLOSE_GENERIC		{ $$ = TypenameGrammarAction($type); }
+	;
+
+commaSeparatedTypenames: typeName[type]								{ $$ = CommaSeparatedTypenameGrammarAction($type); }
+	| typeName[type] COMMA commaSeparatedTypenames[next]			{ $$ = CommaSeparatedTypenamesGrammarAction($type, $next); }
 	;
 
 %%

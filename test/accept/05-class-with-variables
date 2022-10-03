@@ -1,0 +1,15 @@
+@startuml
+
+class Potato {
+    - void hola
+    int como
+    # ArrayList estas
+}
+
+class Cabbage {
+    ~ void chau
+    String adios
+    + ArrayList HastaPronto
+}
+
+@enduml
