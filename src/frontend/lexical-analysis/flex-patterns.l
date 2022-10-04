@@ -26,6 +26,8 @@ endline			[\n]
 whitespace		[ \f\n\r\t\v]
 maybeWhitespace [ \f\n\r\t\v]*
 maybeWhitespaceNoNewline [ \f\r\t\v]*
+singlelineInlineContent ([^\'\/\n]|[\.\)\(\;\/\\\{\}\[\]])*
+multilineInlineContent ([^\'\/]|[\.\)\(\;\/\\\{\}\[\]])*
 
 
 %%
@@ -78,9 +80,11 @@ maybeWhitespaceNoNewline [ \f\r\t\v]*
 
 <MULTILINE_INLINE>"'/"                      { EndMultilineInlinePatternAction(); BEGIN(UML); }
 <MULTILINE_INLINE>{endline}                 { ; }
-<MULTILINE_INLINE>.                         { ; }
+<MULTILINE_INLINE>{multilineInlineContent}  { InlineContentPatternAction(yytext, yyleng); }
+<MULTILINE_INLINE>.                         { InlineContentPatternAction(yytext, yyleng); }
 
 <SINGLELINE_INLINE>{endline}                { token t = EndSinglelineInlinePatternAction(); BEGIN(UML); return t; }
-<SINGLELINE_INLINE>.                        { ; }
+<SINGLELINE_INLINE>{singlelineInlineContent} { InlineContentPatternAction(yytext, yyleng); }
+<SINGLELINE_INLINE>.                        { InlineContentPatternAction(yytext, yyleng); }
 
 %% 
