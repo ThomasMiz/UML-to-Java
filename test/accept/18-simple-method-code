@@ -1,0 +1,26 @@
+@startuml
+
+'comment: Barcos en la marina
+
+class Auto {
+    void motor() 'code: System.out.println("brumm brumm");
+    void derrapar() /'
+        code:
+        System.out.println(
+            "Fiiiuuuuummmm"
+        );
+    '/
+    List<Pedro> pedros
+    ' pedro :D
+    juan myJuan
+    /'
+        kevin :(((
+    '/
+    marcelo myRcelo
+    /'
+}
+@enduml
+'/
+
+}
+@enduml

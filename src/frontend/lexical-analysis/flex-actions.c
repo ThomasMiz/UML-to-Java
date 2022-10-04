@@ -112,7 +112,7 @@ token PublicPatternAction() {
 /* ---------------------------------------------------- */
 
 token SymbolnamePatternAction(const char* lexeme, const int length) {
-	LogDebug("SymbolnamePatternAction.");
+	LogDebug("SymbolnamePatternAction(%s, %d).", lexeme, length);
 	strncpy(yylval.symbolName, lexeme, sizeof(yylval.symbolName)-1);
 	return SYMBOLNAME;
 }
@@ -162,3 +162,43 @@ token CloseGenericPatternAction() {
 }
 
 /* ---------------------------------------------------- */
+
+void StartInlineCodePatternAction() {
+	LogDebug("StartInlineCodePatternAction.");
+}
+
+void StartInlineCommentPatternAction() {
+	LogDebug("StartInlineCommentPatternAction.");
+}
+
+void StartMultilineCommentPatternAction() {
+	LogDebug("StartMultilineCommentPatternAction.");
+}
+
+void StartSinglelineCommentPatternAction() {
+	LogDebug("StartSinglelineCommentPatternAction.");
+}
+
+token EndSinglelineCommentPatternAction() {
+	LogDebug("EndSinglelineCommentPatternAction.");
+	yylval.token = ENDLINE;
+	return ENDLINE;
+}
+
+void EndMultilineCommentPatternAction() {
+	LogDebug("EndMultilineCommentPatternAction.");
+}
+
+void EndMultilineInlinePatternAction() {
+	LogDebug("EndMultilineInlinePatternAction.");
+}
+
+token EndSinglelineInlinePatternAction() {
+	LogDebug("EndSinglelineInlinePatternAction.");
+	yylval.token = ENDLINE;
+	return ENDLINE;
+}
+
+void InlineContentPatternAction(const char* lexeme, const int length) {
+	LogDebug("InlineContentPatternAction(%s, %d).", lexeme, length);
+}

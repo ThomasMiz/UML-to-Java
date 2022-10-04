@@ -1,0 +1,7 @@
+@startuml
+
+class Pepito(){
+    void method(); /'code System.out.println('Pepito'); 
+}
+
+@enduml

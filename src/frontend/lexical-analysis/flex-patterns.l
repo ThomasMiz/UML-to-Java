@@ -15,11 +15,17 @@
 
 /* Contextos de Flex. */
 %x UML
+%x SINGLELINE_COMMENT
+%x MULTILINE_COMMENT
+%x SINGLELINE_INLINE
+%x MULTILINE_INLINE
 
 /* Patrones reutilizables. */
 symbolName      [a-zA-Z][a-zA-Z0-9_]*
 endline			[\n]
 whitespace		[ \f\n\r\t\v]
+maybeWhitespace [ \f\n\r\t\v]*
+maybeWhitespaceNoNewline [ \f\r\t\v]*
 
 
 %%
@@ -55,5 +61,26 @@ whitespace		[ \f\n\r\t\v]
 <UML>")"                                    { return CloseParenthesisPatternAction(); }
 <UML>"<"                                    { return OpenGenericPatternAction(); }
 <UML>">"                                    { return CloseGenericPatternAction(); }
-%% 
 
+<UML>"'"{maybeWhitespaceNoNewline}"code:"   { StartInlineCodePatternAction(); BEGIN(SINGLELINE_INLINE); }
+<UML>"'"{maybeWhitespaceNoNewline}"comment:" { StartInlineCommentPatternAction(); BEGIN(SINGLELINE_INLINE); }
+<UML>"/'"{maybeWhitespace}"code:"           { StartInlineCodePatternAction(); BEGIN(MULTILINE_INLINE); }
+<UML>"/'"{maybeWhitespace}"comment:"        { StartInlineCommentPatternAction(); BEGIN(MULTILINE_INLINE); }
+<UML>"/'"                                   { StartMultilineCommentPatternAction(); BEGIN(MULTILINE_COMMENT); }
+<UML>"'"                                    { StartSinglelineCommentPatternAction(); BEGIN(SINGLELINE_COMMENT); }
+
+<MULTILINE_COMMENT>"'/"                     { EndMultilineCommentPatternAction(); BEGIN(UML); }
+<MULTILINE_COMMENT>{endline}                { ; }
+<MULTILINE_COMMENT>.                        { ; }
+
+<SINGLELINE_COMMENT>{endline}               { token t = EndSinglelineCommentPatternAction(); BEGIN(UML); return t; }
+<SINGLELINE_COMMENT>.                       { ; }
+
+<MULTILINE_INLINE>"'/"                      { EndMultilineInlinePatternAction(); BEGIN(UML); }
+<MULTILINE_INLINE>{endline}                 { ; }
+<MULTILINE_INLINE>.                         { ; }
+
+<SINGLELINE_INLINE>{endline}                { token t = EndSinglelineInlinePatternAction(); BEGIN(UML); return t; }
+<SINGLELINE_INLINE>.                        { ; }
+
+%% 

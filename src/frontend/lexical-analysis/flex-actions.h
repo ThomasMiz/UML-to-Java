@@ -57,4 +57,17 @@ token CloseParenthesisPatternAction();
 token OpenGenericPatternAction();
 token CloseGenericPatternAction();
 
+/* ---------------------------------------------------- */
+
+void StartInlineCodePatternAction();
+void StartInlineCommentPatternAction();
+void StartMultilineCommentPatternAction();
+void StartSinglelineCommentPatternAction();
+token EndSinglelineCommentPatternAction();
+void EndMultilineCommentPatternAction();
+void EndMultilineInlinePatternAction();
+token EndSinglelineInlinePatternAction();
+
+void InlineContentPatternAction(const char* lexeme, const int length);
+
 #endif
