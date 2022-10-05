@@ -18,8 +18,8 @@ int UmlBodyGrammarAction(const int classDef, const int body);
 
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */
 
-int ClassDefinitionGrammarAction(const int name, const int ext, const int imp, const int body);
-int InterfaceDefinitionGrammarAction(const int name, const int ext, const int body);
+int ClassDefinitionGrammarAction(const int name, const int ext, const int imp, const int imports, const int body);
+int InterfaceDefinitionGrammarAction(const int name, const int ext, const int imports, const int body);
 int ExtendsGrammarAction(const int type);
 int ImplementsGrammarAction(const int commaSeparatedTypenames);
 int ClassBodyGrammarAction(const int content, const int next);
