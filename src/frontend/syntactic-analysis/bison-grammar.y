@@ -122,12 +122,12 @@ umlBodyContent: classDefinition										{ $$ = $1; }
 
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */
 
-classDefinition: CLASS typeName[name] extends[ext] implements[imp] OPEN_BLOCK classBody[body] CLOSE_BLOCK
-																	{ $$ = ClassDefinitionGrammarAction($name, $ext, $imp, $body); }
+classDefinition: CLASS typeName[name] extends[ext] implements[imp] OPEN_BLOCK maybeEndlines inlineImportList[imports] classBody[body] CLOSE_BLOCK
+																	{ $$ = ClassDefinitionGrammarAction($name, $ext, $imp, $imports, $body); }
 	;
 
-interfaceDefinition: INTERFACE typeName[name] extends[ext] OPEN_BLOCK interfaceBody[body] CLOSE_BLOCK
-									  								{ $$ = InterfaceDefinitionGrammarAction($name, $ext, $body); }
+interfaceDefinition: INTERFACE typeName[name] extends[ext] OPEN_BLOCK maybeEndlines inlineImportList[imports] interfaceBody[body] CLOSE_BLOCK
+																	{ $$ = InterfaceDefinitionGrammarAction($name, $ext, $imports, $body); }
 	;
 
 extends: EXTENDS typeName[type]										{ $$ = ExtendsGrammarAction($type); }
@@ -138,14 +138,12 @@ implements: IMPLEMENTS commaSeparatedTypenames[types]				{ $$ = ImplementsGramma
 	| /* lambda */													{ $$ = 0; }
 	;
 
-classBody: classBodyContent[content] ENDLINE classBody[next]		{ $$ = ClassBodyGrammarAction($content, $next); }
-	| ENDLINE classBody[next]										{ $$ = $next; }
+classBody: classBodyContent[content] endlines classBody[next]		{ $$ = ClassBodyGrammarAction($content, $next); }
 	| /* lambda */													{ $$ = 0; }
 	;
 
 classBodyContent: maybeAccessModifier[acc] classElement[elem]		{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| inlineComment													{ $$ = $1; }
-	| inlineImport													{ $$ = $1; }
 	;
 
 classElement: symbolName[name] methodParams[params]	maybeInlineCode[code]
@@ -160,13 +158,12 @@ classElement: symbolName[name] methodParams[params]	maybeInlineCode[code]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params, $code); }
 	;
 
-abstractClassDefinition: ABSTRACT CLASS typeName[name] extends[ext] implements[imp] OPEN_BLOCK abstractClassBody[body] CLOSE_BLOCK 
-																	{ $$ = ClassDefinitionGrammarAction($name, $ext, $imp, $body); }
+abstractClassDefinition: ABSTRACT CLASS typeName[name] extends[ext] implements[imp] OPEN_BLOCK maybeEndlines inlineImportList[imports] abstractClassBody[body] CLOSE_BLOCK 
+																	{ $$ = ClassDefinitionGrammarAction($name, $ext, $imp, $imports, $body); }
 	;
 
-abstractClassBody: abstractClassBodyContent[content] ENDLINE abstractClassBody[next]
+abstractClassBody: abstractClassBodyContent[content] endlines abstractClassBody[next]
 																	{ $$ = ClassBodyGrammarAction($content, $next); }
-	| ENDLINE abstractClassBody[next]								{ $$ = $next; }
 	| /* lambda */													{ $$ = 0; }
 	;
 
@@ -174,16 +171,14 @@ abstractClassBodyContent: maybeAccessModifier[acc] classElement[elem]
 																	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| maybeAccessModifier[acc] abstractClassElement[elem]			{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| inlineComment													{ $$ = $1; }
-	| inlineImport													{ $$ = $1; }
 	;
 
 abstractClassElement: abstractModifier[mods] typeName[type] symbolName[name] methodParams[params]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params, 0); }
 	;
 
-interfaceBody: interfaceBodyContent[content] ENDLINE interfaceBody[next]
+interfaceBody: interfaceBodyContent[content] endlines interfaceBody[next]
 																	{ $$ = InterfaceBodyGrammarAction($content, $next); }
-	| ENDLINE interfaceBody[next]									{ $$ = $next; }	
 	| /* lambda */													{ $$ = 0; }
 	;
 
@@ -205,7 +200,6 @@ interfaceBodyContent: abstractModifier[mods] typeName[type] symbolName[name] met
 																	{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, $params, $code); }
 	| typeName[type] symbolName[name] inlineCode[code]				{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, 0, $code); }
 	| inlineComment													{ $$ = $1; }
-	| inlineImport													{ $$ = $1; }
 	;
 
 maybeMethodParams: methodParams										{ $$ = $1; }
@@ -260,6 +254,10 @@ commaSeparatedTypenames: typeName[type] COMMA commaSeparatedTypenames[next]
 	| typeName[type]												{ $$ = CommaSeparatedTypenameGrammarAction($type); }
 	;
 
+endlines: ENDLINE endlines | ENDLINE ;
+
+maybeEndlines: ENDLINE maybeEndlines | /* lambda */ ;
+
 /* -V-------------------------------------- Inlines --------------------------------------V- */
 
 inlineContents: INLINE_CONTENT[content]								{ $$ = InlineContentGrammarAction($content); }
@@ -276,11 +274,12 @@ maybeInlineCode: inlineCode											{ $$ = $1; }
 	| /* lambda */													{ $$ = 0; }
 	;
 
-inlineImport: INLINE_IMPORT inlineContents[importContents] ENDLINE			{ $$ = InlineImportGrammarAction($importContents); }
+inlineImport: INLINE_IMPORT inlineContents[importContents]			{ $$ = InlineImportGrammarAction($importContents); }
 	;
 
 
-inlineImportList: inlineImport[import] ENDLINE inlineImportList[next] { $$ = InlineImportListGrammarAction($import, $next); }
+inlineImportList: inlineImport[import] endlines inlineImportList[next]
+																	{ $$ = InlineImportListGrammarAction($import, $next); }
 	| /* lambda */													{ $$ = 0; }
 	;
 

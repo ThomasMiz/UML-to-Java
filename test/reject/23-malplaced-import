@@ -1,10 +1,7 @@
 @startuml
 
-
-
-class Papafrita {
+class Papalhorno {
     'import: import
-    'import: hhhhhhh'/
 
 
     # {static} final int constante /'code: 50; '/
@@ -24,6 +21,8 @@ class Papafrita {
     //a/a////a///a//''''a''''a'aaa'
 
     @enduml'/
+    
+    'import: hhhhhhh'/
 
 }
 

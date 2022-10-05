@@ -59,14 +59,14 @@ int UmlBodyGrammarAction(const int classDef, const int body) {
 
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */
 
-int ClassDefinitionGrammarAction(const int name, const int ext, const int imp, const int body) {
-	LogDebug("\tClassDefinitionGrammarAction(%d, %d, %d, %d)", name, ext, imp, body);
-	return name + ext + imp + body;
+int ClassDefinitionGrammarAction(const int name, const int ext, const int imp, const int imports, const int body) {
+	LogDebug("\tClassDefinitionGrammarAction(%d, %d, %d, %d, %d)", name, ext, imp, imports, body);
+	return name + ext + imp + imports + body;
 }
 
-int InterfaceDefinitionGrammarAction(const int name, const int ext, const int body) {
-	LogDebug("\tInterfaceDefinitionGrammarAction(%d, %d, %d)", name, ext, body);
-	return name + ext + body;
+int InterfaceDefinitionGrammarAction(const int name, const int ext, const int imports, const int body) {
+	LogDebug("\tInterfaceDefinitionGrammarAction(%d, %d, %d, %d)", name, ext, imports, body);
+	return name + ext + imports + body;
 }
 
 int ExtendsGrammarAction(const int type) {
