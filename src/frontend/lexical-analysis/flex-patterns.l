@@ -29,6 +29,8 @@ maybeWhitespaceNoNewline [ \f\r\t\v]*
 singlelineInlineContent ([^\'\n]|[\|\°\¬\!\"\#\$\%\&\/\(\)\=\?\¡\\\¿\+\*\~\[\]\{\}\^\-\_\:\;\.\,\>\<])*
 multilineInlineContent ([^\']|[\|\°\¬\!\"\#\$\%\&\/\(\)\=\?\¡\\\¿\+\*\~\[\]\{\}\^\-\_\:\;\.\,\>\<])*
 
+/* <UML>"/'"{maybeWhitespace}"import:"        { token t = StartInlineImportPatternAction(); BEGIN(MULTILINE_INLINE); return t; } */
+
 
 %%
 "@startuml"									{ BEGIN(UML); return StartUMLPatternAction(); }
@@ -69,7 +71,6 @@ multilineInlineContent ([^\']|[\|\°\¬\!\"\#\$\%\&\/\(\)\=\?\¡\\\¿\+\*\~\[\]\
 <UML>"'"{maybeWhitespaceNoNewline}"import:" { token t = StartInlineImportPatternAction(); BEGIN(SINGLELINE_INLINE); return t; }
 <UML>"/'"{maybeWhitespace}"code:"           { token t = StartInlineCodePatternAction(); BEGIN(MULTILINE_INLINE); return t; }
 <UML>"/'"{maybeWhitespace}"comment:"        { token t = StartInlineCommentPatternAction(); BEGIN(MULTILINE_INLINE); return t; }
-<UML>"/'"{maybeWhitespace}"import:"        { token t = StartInlineImportPatternAction(); BEGIN(MULTILINE_INLINE); return t; }
 <UML>"/'"                                   { StartMultilineCommentPatternAction(); BEGIN(MULTILINE_COMMENT); }
 <UML>"'"                                    { StartSinglelineCommentPatternAction(); BEGIN(SINGLELINE_COMMENT); }
 

@@ -1,0 +1,30 @@
+@startuml
+
+
+
+class Papafrita {
+    'import: import
+
+
+    # {static} final int constante /'code: 50; '/
+    + {static} int variableEstatic
+
+    'import: hhhhhhh'/
+
+    /'@startuml
+
+    abstract class Inception {
+        # {static} final int constante 'code: 0;
+        ~ {static} void soyEstatico() 'code: return;
+        {static} final void soyFaina() 
+            code: return; 
+        + {static} int variableEstatic
+
+    }
+    //a/a////a///a//''''a''''a'aaa'
+
+    @enduml'/
+
+}
+
+@enduml

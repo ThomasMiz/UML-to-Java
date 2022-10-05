@@ -145,6 +145,7 @@ classBody: classBodyContent[content] ENDLINE classBody[next]		{ $$ = ClassBodyGr
 
 classBodyContent: maybeAccessModifier[acc] classElement[elem]		{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| inlineComment													{ $$ = $1; }
+	| inlineImport													{ $$ = $1; }
 	;
 
 classElement: symbolName[name] methodParams[params]	maybeInlineCode[code]
@@ -173,6 +174,7 @@ abstractClassBodyContent: maybeAccessModifier[acc] classElement[elem]
 																	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| maybeAccessModifier[acc] abstractClassElement[elem]			{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| inlineComment													{ $$ = $1; }
+	| inlineImport													{ $$ = $1; }
 	;
 
 abstractClassElement: abstractModifier[mods] typeName[type] symbolName[name] methodParams[params]
@@ -203,6 +205,7 @@ interfaceBodyContent: abstractModifier[mods] typeName[type] symbolName[name] met
 																	{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, $params, $code); }
 	| typeName[type] symbolName[name] inlineCode[code]				{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, 0, $code); }
 	| inlineComment													{ $$ = $1; }
+	| inlineImport													{ $$ = $1; }
 	;
 
 maybeMethodParams: methodParams										{ $$ = $1; }
@@ -273,8 +276,9 @@ maybeInlineCode: inlineCode											{ $$ = $1; }
 	| /* lambda */													{ $$ = 0; }
 	;
 
-inlineImport: INLINE_IMPORT inlineContents[importContents]			{ $$ = InlineImportGrammarAction($importContents); }
+inlineImport: INLINE_IMPORT inlineContents[importContents] ENDLINE			{ $$ = InlineImportGrammarAction($importContents); }
 	;
+
 
 inlineImportList: inlineImport[import] ENDLINE inlineImportList[next] { $$ = InlineImportListGrammarAction($import, $next); }
 	| /* lambda */													{ $$ = 0; }
