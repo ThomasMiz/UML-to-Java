@@ -139,12 +139,12 @@ implements: IMPLEMENTS commaSeparatedTypenames[types]				{ $$ = ImplementsGramma
 	;
 
 classBody: classBodyContent[content] ENDLINE classBody[next]		{ $$ = ClassBodyGrammarAction($content, $next); }
+	| ENDLINE classBody[next]										{ $$ = $next; }
 	| /* lambda */													{ $$ = 0; }
 	;
 
 classBodyContent: maybeAccessModifier[acc] classElement[elem]		{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| inlineComment													{ $$ = $1; }
-	| /* lambda */													{ $$ = 0; }
 	;
 
 classElement: symbolName[name] methodParams[params]	maybeInlineCode[code]
@@ -165,6 +165,7 @@ abstractClassDefinition: ABSTRACT CLASS typeName[name] extends[ext] implements[i
 
 abstractClassBody: abstractClassBodyContent[content] ENDLINE abstractClassBody[next]
 																	{ $$ = ClassBodyGrammarAction($content, $next); }
+	| ENDLINE abstractClassBody[next]								{ $$ = $next; }
 	| /* lambda */													{ $$ = 0; }
 	;
 
@@ -172,7 +173,6 @@ abstractClassBodyContent: maybeAccessModifier[acc] classElement[elem]
 																	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| maybeAccessModifier[acc] abstractClassElement[elem]			{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| inlineComment													{ $$ = $1; }
-    | /* lambda */													{ $$ = 0; }
 	;
 
 abstractClassElement: abstractModifier[mods] typeName[type] symbolName[name] methodParams[params]
@@ -181,6 +181,7 @@ abstractClassElement: abstractModifier[mods] typeName[type] symbolName[name] met
 
 interfaceBody: interfaceBodyContent[content] ENDLINE interfaceBody[next]
 																	{ $$ = InterfaceBodyGrammarAction($content, $next); }
+	| ENDLINE interfaceBody[next]									{ $$ = $next; }	
 	| /* lambda */													{ $$ = 0; }
 	;
 
@@ -202,7 +203,6 @@ interfaceBodyContent: abstractModifier[mods] typeName[type] symbolName[name] met
 																	{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, $params, $code); }
 	| typeName[type] symbolName[name] inlineCode[code]				{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, 0, $code); }
 	| inlineComment													{ $$ = $1; }
-	| /* lambda */													{ $$ = 0; }
 	;
 
 maybeMethodParams: methodParams										{ $$ = $1; }
