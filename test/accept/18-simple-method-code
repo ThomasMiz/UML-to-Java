@@ -1,8 +1,7 @@
 @startuml
 
-'comment: Barcos en la marina
-
 class Auto {
+    'comment: Barcos en la marina
     void motor() 'code: System.out.println("brumm brumm");
     void derrapar() /'
         code:

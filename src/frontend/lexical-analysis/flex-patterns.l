@@ -26,8 +26,8 @@ endline			[\n]
 whitespace		[ \f\n\r\t\v]
 maybeWhitespace [ \f\n\r\t\v]*
 maybeWhitespaceNoNewline [ \f\r\t\v]*
-singlelineInlineContent ([^\'\/\n]|[\.\)\(\;\/\\\{\}\[\]])*
-multilineInlineContent ([^\'\/]|[\.\)\(\;\/\\\{\}\[\]])*
+singlelineInlineContent ([^\'\n]|[\|\°\¬\!\"\#\$\%\&\/\(\)\=\?\¡\\\¿\+\*\~\[\]\{\}\^\-\_\:\;\.\,\>\<])*
+multilineInlineContent ([^\']|[\|\°\¬\!\"\#\$\%\&\/\(\)\=\?\¡\\\¿\+\*\~\[\]\{\}\^\-\_\:\;\.\,\>\<])*
 
 
 %%
@@ -64,10 +64,10 @@ multilineInlineContent ([^\'\/]|[\.\)\(\;\/\\\{\}\[\]])*
 <UML>"<"                                    { return OpenGenericPatternAction(); }
 <UML>">"                                    { return CloseGenericPatternAction(); }
 
-<UML>"'"{maybeWhitespaceNoNewline}"code:"   { StartInlineCodePatternAction(); BEGIN(SINGLELINE_INLINE); }
-<UML>"'"{maybeWhitespaceNoNewline}"comment:" { StartInlineCommentPatternAction(); BEGIN(SINGLELINE_INLINE); }
-<UML>"/'"{maybeWhitespace}"code:"           { StartInlineCodePatternAction(); BEGIN(MULTILINE_INLINE); }
-<UML>"/'"{maybeWhitespace}"comment:"        { StartInlineCommentPatternAction(); BEGIN(MULTILINE_INLINE); }
+<UML>"'"{maybeWhitespaceNoNewline}"code:"   { token t = StartInlineCodePatternAction(); BEGIN(SINGLELINE_INLINE); return t; }
+<UML>"'"{maybeWhitespaceNoNewline}"comment:" { token t = StartInlineCommentPatternAction(); BEGIN(SINGLELINE_INLINE); return t; }
+<UML>"/'"{maybeWhitespace}"code:"           { token t = StartInlineCodePatternAction(); BEGIN(MULTILINE_INLINE); return t; }
+<UML>"/'"{maybeWhitespace}"comment:"        { token t = StartInlineCommentPatternAction(); BEGIN(MULTILINE_INLINE); return t; }
 <UML>"/'"                                   { StartMultilineCommentPatternAction(); BEGIN(MULTILINE_COMMENT); }
 <UML>"'"                                    { StartSinglelineCommentPatternAction(); BEGIN(SINGLELINE_COMMENT); }
 
@@ -79,12 +79,11 @@ multilineInlineContent ([^\'\/]|[\.\)\(\;\/\\\{\}\[\]])*
 <SINGLELINE_COMMENT>.                       { ; }
 
 <MULTILINE_INLINE>"'/"                      { EndMultilineInlinePatternAction(); BEGIN(UML); }
-<MULTILINE_INLINE>{endline}                 { ; }
-<MULTILINE_INLINE>{multilineInlineContent}  { InlineContentPatternAction(yytext, yyleng); }
-<MULTILINE_INLINE>.                         { InlineContentPatternAction(yytext, yyleng); }
+<MULTILINE_INLINE>{multilineInlineContent}  { return InlineContentPatternAction(yytext, yyleng); }
+<MULTILINE_INLINE>.                         { return InlineContentPatternAction(yytext, yyleng); }
 
 <SINGLELINE_INLINE>{endline}                { token t = EndSinglelineInlinePatternAction(); BEGIN(UML); return t; }
-<SINGLELINE_INLINE>{singlelineInlineContent} { InlineContentPatternAction(yytext, yyleng); }
-<SINGLELINE_INLINE>.                        { InlineContentPatternAction(yytext, yyleng); }
+<SINGLELINE_INLINE>{singlelineInlineContent} { return InlineContentPatternAction(yytext, yyleng); }
+<SINGLELINE_INLINE>.                        { return InlineContentPatternAction(yytext, yyleng); }
 
 %% 

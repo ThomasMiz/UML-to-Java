@@ -163,14 +163,6 @@ token CloseGenericPatternAction() {
 
 /* ---------------------------------------------------- */
 
-void StartInlineCodePatternAction() {
-	LogDebug("StartInlineCodePatternAction.");
-}
-
-void StartInlineCommentPatternAction() {
-	LogDebug("StartInlineCommentPatternAction.");
-}
-
 void StartMultilineCommentPatternAction() {
 	LogDebug("StartMultilineCommentPatternAction.");
 }
@@ -199,6 +191,22 @@ token EndSinglelineInlinePatternAction() {
 	return ENDLINE;
 }
 
-void InlineContentPatternAction(const char* lexeme, const int length) {
+/* ---------------------------------------------------- */
+
+token StartInlineCodePatternAction() {
+	LogDebug("StartInlineCodePatternAction.");
+	yylval.token = INLINE_CODE;
+	return INLINE_CODE;
+}
+
+token StartInlineCommentPatternAction() {
+	LogDebug("StartInlineCommentPatternAction.");
+	yylval.token = INLINE_COMMENT;
+	return INLINE_COMMENT;
+}
+
+token InlineContentPatternAction(const char* lexeme, const int length) {
 	LogDebug("InlineContentPatternAction(%s, %d).", lexeme, length);
+	yylval.token = INLINE_CONTENT;
+	return INLINE_CONTENT;
 }

@@ -183,6 +183,8 @@ int FinalGrammarAction() {
 	return 1;
 }
 
+/* -V-------------------------------------- Misc --------------------------------------V- */
+
 int SymbolnameGrammarAction(const char* symbol) {
 	LogDebug("\tSymbolnameGrammarAction(%s)", symbol);
 	return 1;
@@ -206,4 +208,26 @@ int CommaSeparatedTypenameGrammarAction(const int type) {
 int CommaSeparatedTypenamesGrammarAction(const int type, const int next) {
 	LogDebug("\tCommaSeparatedTypenamesGrammarAction(%d, %d)", type, next);
 	return type + next;
+}
+
+/* -V-------------------------------------- Inlines --------------------------------------V- */
+
+int InlineContentGrammarAction(const char* content) {
+	LogDebug("\tInlineContentGrammarAction(%s)", content);
+	return 1;
+}
+
+int InlineContentsGrammarAction(const char* content, const int next) {
+	LogDebug("\tInlineContentsGrammarAction(%s, %d)", content, next);
+	return 1 + next;
+}
+
+int InlineCodeGrammarAction(const int codeContents) {
+	LogDebug("\tInlineCodeGrammarAction(%d)", codeContents);
+	return codeContents;
+}
+
+int InlineCommentGrammarAction(const int commentContents) {
+	LogDebug("\tInlineCommentGrammarAction(%d)", commentContents);
+	return commentContents;
 }

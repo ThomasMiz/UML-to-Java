@@ -51,6 +51,10 @@
 %token <token> OPEN_GENERIC
 %token <token> CLOSE_GENERIC
 
+%token <token> INLINE_CODE
+%token <token> INLINE_COMMENT
+
+%token <symbolName> INLINE_CONTENT
 %token <symbolName> SYMBOLNAME
 
 // Tipos de dato para los no-terminales generados desde Bison.
@@ -72,17 +76,19 @@
 %type <string> interfaceBody
 %type <string> interfaceBodyContent
 %type <string> interfaceMethodOrVariableModifiers
-%type <string> interfaceMethodOnlyModifiers
 %type <string> maybeMethodParams
 %type <string> methodParams
 %type <string> parameterList
-%type <string> classAbstractMethodModifier
+%type <string> abstractModifier
 %type <string> classMethodOrVariableModifiers
 %type <string> accessModifier
 %type <string> symbolName
 %type <string> typeName
 %type <string> commaSeparatedTypenames
-
+%type <string> inlineContents
+%type <string> inlineCode
+%type <string> inlineComment
+%type <string> maybeInlineCode
 
 // Reglas de asociatividad y precedencia (de menor a mayor).
 // ((las borré todos))
@@ -132,7 +138,9 @@ classBody: classBodyContent[content] classBody[next]				{ $$ = ClassBodyGrammarA
 	| /* lambda */													{ $$ = 0; }
 	;
 
-classBodyContent: accessModifier[acc] classElement[elem] ENDLINE	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
+classBodyContent: accessModifier[acc] classElement[elem] maybeInlineCode[inlineCode] ENDLINE
+																	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
+	| inlineComment[inlineComment] ENDLINE							{ $$ = InlineCommentGrammarAction($inlineComment); }
 	| ENDLINE														{ $$ = 0; }
 	;
 
@@ -151,16 +159,14 @@ abstractClassBody: abstractClassBodyContent[content]  abstractClassBody[next]
 	| /* lambda */													{ $$ = 0; }
 	;
 
-abstractClassBodyContent: accessModifier[acc] abstractClassElement[elem] ENDLINE
+abstractClassBodyContent: accessModifier[acc] classElement[elem] ENDLINE
 																	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
+	| accessModifier[acc] abstractClassElement[elem] ENDLINE		{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
+	| inlineComment[comment] ENDLINE								{ $$ = InlineCommentGrammarAction($comment); }
     | ENDLINE														{ $$ = 0; }
 	;
 
-abstractClassElement: symbolName[name] methodParams[params]			{ $$ = 0; }
-	| typeName[type] symbolName[name] maybeMethodParams[params]		{ $$ = 0; }
-	| classMethodOrVariableModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params]
-																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params); }
-	| classAbstractMethodModifier[mods] typeName[type] symbolName[name] methodParams[params]
+abstractClassElement: abstractModifier[mods] typeName[type] symbolName[name] methodParams[params]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params); }
 	;
 
@@ -168,18 +174,16 @@ interfaceBody: interfaceBodyContent[content] interfaceBody[next]	{ $$ = Interfac
 	| /* lambda */													{ $$ = 0; }
 	;
 
-interfaceBodyContent: interfaceMethodOnlyModifiers[mods] typeName[type] symbolName[name] methodParams[params] ENDLINE
+interfaceBodyContent: abstractModifier[mods] typeName[type] symbolName[name] methodParams[params] ENDLINE
 																	{ $$ = InterfaceBodyContentGrammarAction($mods, $type, $name, $params); }
-	| interfaceMethodOrVariableModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params] ENDLINE
+	| interfaceMethodOrVariableModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params] maybeInlineCode[inlineCode] ENDLINE
 																	{ $$ = InterfaceBodyContentGrammarAction($mods, $type, $name, $params); }
+	| inlineComment[inlineComment] ENDLINE							{ $$ = 0; }
 	| ENDLINE														{ $$ = 0; }
 	;
 
 interfaceMethodOrVariableModifiers: OPEN_BLOCK STATIC CLOSE_BLOCK	{ $$ = StaticGrammarAction(); }
 	| /* lambda */													{ $$ = 0; }
-	;
-
-interfaceMethodOnlyModifiers: OPEN_BLOCK ABSTRACT CLOSE_BLOCK		{ $$ = AbstractGrammarAction(); }
 	;
 
 maybeMethodParams: methodParams										{ $$ = $1; }
@@ -195,7 +199,7 @@ parameterList: typeName[type] symbolName[name]						{ $$ = ParameterGrammarActio
 	| /* lambda */													{ $$ = 0; }
 	;
 
-classAbstractMethodModifier: OPEN_BLOCK ABSTRACT CLOSE_BLOCK		{ $$ = AbstractGrammarAction(); }
+abstractModifier: OPEN_BLOCK ABSTRACT CLOSE_BLOCK					{ $$ = AbstractGrammarAction(); }
 	;
 
 classMethodOrVariableModifiers: OPEN_BLOCK STATIC CLOSE_BLOCK		{ $$ = FinalGrammarAction(); }
@@ -226,4 +230,19 @@ commaSeparatedTypenames: typeName[type] COMMA commaSeparatedTypenames[next]
 	| typeName[type]												{ $$ = CommaSeparatedTypenameGrammarAction($type); }
 	;
 
+/* -V-------------------------------------- Inlines --------------------------------------V- */
+
+inlineContents: INLINE_CONTENT[content]								{ $$ = InlineContentGrammarAction($content); }
+	| INLINE_CONTENT[content] inlineContents[next]					{ $$ = InlineContentsGrammarAction($content, $next); }
+	;
+
+inlineCode: INLINE_CODE inlineContents[codeContents]				{ $$ = InlineCodeGrammarAction($codeContents); }
+	;
+
+inlineComment: INLINE_COMMENT inlineContents[commentContents]		{ $$ = InlineCommentGrammarAction($commentContents); }
+	;
+
+maybeInlineCode: inlineCode											{ $$ = $1; }
+	| /* lambda */													{ $$ = 0; }
+	;
 %%

@@ -57,4 +57,11 @@ int GenericTypenameGrammarAction(const char* name, const int genericType);
 int CommaSeparatedTypenameGrammarAction(const int type);
 int CommaSeparatedTypenamesGrammarAction(const int type, const int next);
 
+/* -V-------------------------------------- Inlines --------------------------------------V- */
+
+int InlineContentPatternAction(const char* content);
+int InlineContentsPatternAction(const char* content, const int next);
+int InlineCodePatternAction(const int codeContents);
+int InlineCommentPatternAction(const int commentContents);
+
 #endif
