@@ -1,0 +1,8 @@
+@startuml
+
+interface This is not fine {
+
+    
+}
+
+@enduml

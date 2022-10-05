@@ -1,0 +1,8 @@
+@startuml
+
+interface Interface {
+    int method1()
+    int method2()
+}
+
+@enduml

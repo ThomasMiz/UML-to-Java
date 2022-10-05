@@ -1,0 +1,7 @@
+@startuml
+
+abstract interface ItShouldNotBeAllowed {
+    
+}
+
+@enduml

@@ -1,0 +1,7 @@
+@startuml
+
+interface Generic<Class>{
+    int myMethod(Generic<Class> constant)
+}
+
+@enduml
