@@ -1,11 +1,14 @@
 @startuml
 
 abstract class Empanada {
-    # {static} final List<Integer> constante
+    # Empanada(Carne<T> c, Verdura<D> d)
+    # Empanada(int i) 'code: hola();
+    
+    # {static} final List<Integer> constante 'code: new ArrayList<Integer>
     + {abstract} void hola()
     {abstract} void quetal()
-    ~ {static} void soyEstatico()
-    {static} final void soyFaina()
+    ~ {static} void soyEstatico() 'code: return;
+    {static} final void soyFaina() 'code: return;
     + {static} Function<Boolean,Boolean> variableEstatic
 }
 

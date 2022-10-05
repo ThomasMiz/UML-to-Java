@@ -1,7 +1,7 @@
 @startuml
 
 interface Interface{
-    {static} int myMethod()
+    {static} int myMethod() 'code: return 5;
 }
 
 @enduml

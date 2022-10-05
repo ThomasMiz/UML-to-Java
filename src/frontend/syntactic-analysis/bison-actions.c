@@ -84,19 +84,19 @@ int ClassBodyGrammarAction(const int content, const int next) {
 	return content + next;
 }
 
-int ClassBodyContentGrammarAction(const int acc, const int elem, const int inlineCode) {
-	LogDebug("\tClassBodyContentGrammarAction(%d, %d, %d)", acc, elem, inlineCode);
-	return acc + elem + inlineCode;
+int ClassBodyContentGrammarAction(const int acc, const int elem) {
+	LogDebug("\tClassBodyContentGrammarAction(%d, %d)", acc, elem);
+	return acc + elem;
 }
 
-int ClassConstructorGrammarAction(const int name, const int params) {
-	LogDebug("\tClassConstructorGrammarAction(%d, %d)", name, params);
-	return name + params;
+int ClassConstructorGrammarAction(const int name, const int params, const int inlineCode) {
+	LogDebug("\tClassConstructorGrammarAction(%d, %d, %d)", name, params, inlineCode);
+	return name + params + inlineCode;
 }
 
-int ClassElementGrammarAction(const int mods, const int type, const int name, const int params) {
-	LogDebug("\tClassElementGrammarAction(%d, %d, %d, %d)", mods, type, name, params);
-	return mods + type + name + params;
+int ClassElementGrammarAction(const int mods, const int type, const int name, const int params, const int inlineCode) {
+	LogDebug("\tClassElementGrammarAction(%d, %d, %d, %d, %d)", mods, type, name, params, inlineCode);
+	return mods + type + name + params + inlineCode;
 }
 
 int InterfaceBodyGrammarAction(const int content, const int next) {
@@ -104,9 +104,9 @@ int InterfaceBodyGrammarAction(const int content, const int next) {
 	return content + next;
 }
 
-int InterfaceBodyContentGrammarAction(const int mods, const int type, const int name, const int params, const int inlineCode) {
-	LogDebug("\tInterfaceBodyContentGrammarAction(%d, %d, %d, %d, %d)", mods, type, name, params, inlineCode);
-	return mods + type + name + params + inlineCode;
+int InterfaceBodyContentGrammarAction(const int acc, const int mods, const int type, const int name, const int params, const int inlineCode) {
+	LogDebug("\tInterfaceBodyContentGrammarAction(%d, %d, %d, %d, %d, %d)", acc, mods, type, name, params, inlineCode);
+	return acc + mods + type + name + params + inlineCode;
 }
 
 /* -V-------------------------------------- Methods --------------------------------------V- */

@@ -1,7 +1,7 @@
 @startuml
 
 interface Generic<Class>{
-    {static} int myMethod(Generic<Class> constant)
+    {static} int myMethod(Generic<Class> constant) 'code: return 3;
 }
 
 @enduml

@@ -23,11 +23,11 @@ int InterfaceDefinitionGrammarAction(const int name, const int ext, const int bo
 int ExtendsGrammarAction(const int type);
 int ImplementsGrammarAction(const int commaSeparatedTypenames);
 int ClassBodyGrammarAction(const int content, const int next);
-int ClassBodyContentGrammarAction(const int acc, const int elem, const int inlineCode);
-int ClassConstructorGrammarAction(const int name, const int params);
-int ClassElementGrammarAction(const int mods, const int type, const int name, const int params);
+int ClassBodyContentGrammarAction(const int acc, const int elem);
+int ClassConstructorGrammarAction(const int name, const int params, const int inlineCode);
+int ClassElementGrammarAction(const int mods, const int type, const int name, const int params, const int inlineCode);
 int InterfaceBodyGrammarAction(const int content, const int next);
-int InterfaceBodyContentGrammarAction(const int mods, const int type, const int name, const int params, const int inlineCode);
+int InterfaceBodyContentGrammarAction(const int acc, const int mods, const int type, const int name, const int params, const int inlineCode);
 
 /* -V-------------------------------------- Methods --------------------------------------V- */
 

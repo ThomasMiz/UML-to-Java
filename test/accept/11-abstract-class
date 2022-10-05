@@ -1,11 +1,12 @@
 @startuml
 
 abstract class Empanada {
-    # {static} final int constante
+    # {static} final int constante 'code: 5;
     + {abstract} void hola()
     {abstract} void quetal()
-    ~ {static} void soyEstatico()
-    {static} final void soyFaina()
+    ~ {static} void soyEstatico() 'code: return;
+    {static} final void soyFaina() /'
+        code: return; '/
     + {static} int variableEstatic
 
 }

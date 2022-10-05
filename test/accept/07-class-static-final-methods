@@ -1,10 +1,14 @@
 @startuml
 
 class Empanada {
-    {static} void hola()
-    final void como()
-    {static} final void estas()
-    final {static} void yogur()
+    {static} void hola() /'
+        code: return 0;
+    '/
+
+    final void como() 'code: System.out.println("como??");
+
+    {static} final void estas() 'code: System.out.println("nope");
+    final {static} void yogur()'code: System.out.println("helado");
 }
 
 @enduml

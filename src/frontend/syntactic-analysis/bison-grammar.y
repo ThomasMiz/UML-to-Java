@@ -75,14 +75,15 @@
 %type <string> abstractClassElement
 %type <string> interfaceBody
 %type <string> interfaceBodyContent
-%type <string> interfaceMethodOrVariableModifiers
 %type <string> maybeMethodParams
 %type <string> methodParams
 %type <string> parameterList
 %type <string> abstractModifier
 %type <string> staticModifier
-%type <string> classMethodOrVariableModifiers
+%type <string> staticXorFinalModifier
+%type <string> staticAndFinalModifiers
 %type <string> accessModifier
+%type <string> maybeAccessModifier
 %type <string> symbolName
 %type <string> typeName
 %type <string> commaSeparatedTypenames
@@ -138,16 +139,22 @@ classBody: classBodyContent[content] ENDLINE classBody[next]		{ $$ = ClassBodyGr
 	| /* lambda */													{ $$ = 0; }
 	;
 
-classBodyContent: accessModifier[acc] classElement[elem] maybeInlineCode[code]
-																	{ $$ = ClassBodyContentGrammarAction($acc, $elem, $code); }
+classBodyContent: maybeAccessModifier[acc] classElement[elem]
+																	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| inlineComment[comment]										{ $$ = InlineCommentGrammarAction($comment); }
 	| /* lambda */													{ $$ = 0; }
 	;
 
-classElement: symbolName[name] methodParams[params]					{ $$ = ClassConstructorGrammarAction($name, $params); }
-	| typeName[type] symbolName[name] maybeMethodParams[params]		{ $$ = ClassElementGrammarAction(0, $type, $name, $params); }
-	| classMethodOrVariableModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params]
-																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params); }
+classElement: symbolName[name] methodParams[params]	maybeInlineCode[code]
+																	{ $$ = ClassConstructorGrammarAction($name, $params, $code); }
+	| typeName[type] symbolName[name] maybeMethodParams[params]	maybeInlineCode[code]
+																	{ $$ = ClassElementGrammarAction(0, $type, $name, $params, $code); }
+	| staticXorFinalModifier[mods] typeName[type] symbolName[name] methodParams[params] inlineCode[code]
+																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params, $code); }
+	| staticXorFinalModifier[mods] typeName[type] symbolName[name] maybeInlineCode[code]
+																	{ $$ = ClassElementGrammarAction($mods, $type, $name, 0, $code); }
+	| staticAndFinalModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params] inlineCode[code]
+																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params, $code); }
 	;
 
 abstractClassDefinition: ABSTRACT CLASS typeName[name] extends[ext] implements[imp] OPEN_BLOCK abstractClassBody[body] CLOSE_BLOCK 
@@ -159,15 +166,15 @@ abstractClassBody: abstractClassBodyContent[content] ENDLINE abstractClassBody[n
 	| /* lambda */													{ $$ = 0; }
 	;
 
-abstractClassBodyContent: accessModifier[acc] classElement[elem] maybeInlineCode[code]
-																	{ $$ = ClassBodyContentGrammarAction($acc, $elem, $code); }
-	| accessModifier[acc] abstractClassElement[elem]				{ $$ = ClassBodyContentGrammarAction($acc, $elem, 0); }
+abstractClassBodyContent: maybeAccessModifier[acc] classElement[elem]
+																	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
+	| maybeAccessModifier[acc] abstractClassElement[elem]			{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| inlineComment[comment]										{ $$ = InlineCommentGrammarAction($comment); }
     | /* lambda */													{ $$ = 0; }
 	;
 
 abstractClassElement: abstractModifier[mods] typeName[type] symbolName[name] methodParams[params]
-																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params); }
+																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params, 0); }
 	;
 
 interfaceBody: interfaceBodyContent[content] ENDLINE interfaceBody[next]
@@ -176,14 +183,24 @@ interfaceBody: interfaceBodyContent[content] ENDLINE interfaceBody[next]
 	;
 
 interfaceBodyContent: abstractModifier[mods] typeName[type] symbolName[name] methodParams[params]
-																	{ $$ = InterfaceBodyContentGrammarAction($mods, $type, $name, $params, 0); }
-	| interfaceMethodOrVariableModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params] maybeInlineCode[code]
-																	{ $$ = InterfaceBodyContentGrammarAction($mods, $type, $name, $params, $code); }
+																	{ $$ = InterfaceBodyContentGrammarAction(0, $mods, $type, $name, $params, 0); }
+	| staticModifier[mods] typeName[type] symbolName[name] maybeInlineCode[code]
+																	{ $$ = InterfaceBodyContentGrammarAction(0, $mods, $type, $name, 0, $code); }
+	| staticModifier[mods] typeName[type] symbolName[name] methodParams[params] inlineCode[code]
+																	{ $$ = InterfaceBodyContentGrammarAction(0, $mods, $type, $name, $params, $code); }
+	| accessModifier[acc] staticModifier[mods] typeName[type] symbolName[name] maybeInlineCode[code]
+																	{ $$ = InterfaceBodyContentGrammarAction($acc, $mods, $type, $name, 0, $code); }
+	| accessModifier[acc] staticModifier[mods] typeName[type] symbolName[name] methodParams[params] inlineCode[code]
+																	{ $$ = InterfaceBodyContentGrammarAction($acc, $mods, $type, $name, $params, $code); }
+	| staticAndFinalModifiers[mods] typeName[type] symbolName[name] inlineCode[code]
+																	{ $$ = InterfaceBodyContentGrammarAction(0, $mods, $type, $name, 0, $code); }
+	| accessModifier[acc] staticAndFinalModifiers[mods] typeName[type] symbolName[name] inlineCode[code]
+																	{ $$ = InterfaceBodyContentGrammarAction($acc, $mods, $type, $name, 0, $code); }
+	| typeName[type] symbolName[name] methodParams[params] maybeInlineCode[code]
+																	{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, $params, $code); }
+	| typeName[type] symbolName[name] inlineCode[code]
+																	{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, 0, $code); }
 	| inlineComment[comment]										{ $$ = InlineCommentGrammarAction($comment); }
-	| /* lambda */													{ $$ = 0; }
-	;
-
-interfaceMethodOrVariableModifiers: staticModifier					{ $$ = $1; }
 	| /* lambda */													{ $$ = 0; }
 	;
 
@@ -206,9 +223,11 @@ abstractModifier: OPEN_BLOCK ABSTRACT CLOSE_BLOCK					{ $$ = AbstractGrammarActi
 staticModifier: OPEN_BLOCK STATIC CLOSE_BLOCK						{ $$ = StaticGrammarAction(); }
 	;
 
-classMethodOrVariableModifiers: staticModifier						{ $$ = $1; }
+staticXorFinalModifier: staticModifier								{ $$ = $1; }
 	| FINAL															{ $$ = FinalGrammarAction(); }
-	| staticModifier FINAL											{ $$ = $1 + FinalGrammarAction(); }
+	;
+
+staticAndFinalModifiers: staticModifier FINAL						{ $$ = $1 + FinalGrammarAction(); }
 	| FINAL staticModifier											{ $$ = FinalGrammarAction() + $1; }
 	;
 
@@ -218,6 +237,9 @@ accessModifier: DEFAULT 											{ $$ = DefaultGrammarAction(); }
 	| PRIVATE 														{ $$ = PrivateGrammarAction(); }
 	| PROTECTED 													{ $$ = ProtectedGrammarAction(); }
 	| PUBLIC														{ $$ = PublicGrammarAction(); }
+	;
+
+maybeAccessModifier: accessModifier									{ $$ = $1; }
 	| /* lambda */													{ $$ = 0; }
 	;
 
