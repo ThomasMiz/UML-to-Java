@@ -84,9 +84,9 @@ int ClassBodyGrammarAction(const int content, const int next) {
 	return content + next;
 }
 
-int ClassBodyContentGrammarAction(const int acc, const int elem) {
-	LogDebug("\tClassBodyContentGrammarAction(%d, %d)", acc, elem);
-	return acc + elem;
+int ClassBodyContentGrammarAction(const int acc, const int elem, const int inlineCode) {
+	LogDebug("\tClassBodyContentGrammarAction(%d, %d, %d)", acc, elem, inlineCode);
+	return acc + elem + inlineCode;
 }
 
 int ClassConstructorGrammarAction(const int name, const int params) {
@@ -104,9 +104,9 @@ int InterfaceBodyGrammarAction(const int content, const int next) {
 	return content + next;
 }
 
-int InterfaceBodyContentGrammarAction(const int mods, const int type, const int name, const int params) {
-	LogDebug("\tInterfaceBodyContentGrammarAction(%d, %d, %d, %d)", mods, type, name, params);
-	return mods + type + name + params;
+int InterfaceBodyContentGrammarAction(const int mods, const int type, const int name, const int params, const int inlineCode) {
+	LogDebug("\tInterfaceBodyContentGrammarAction(%d, %d, %d, %d, %d)", mods, type, name, params, inlineCode);
+	return mods + type + name + params + inlineCode;
 }
 
 /* -V-------------------------------------- Methods --------------------------------------V- */

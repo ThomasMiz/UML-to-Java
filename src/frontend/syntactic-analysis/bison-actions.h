@@ -23,11 +23,11 @@ int InterfaceDefinitionGrammarAction(const int name, const int ext, const int bo
 int ExtendsGrammarAction(const int type);
 int ImplementsGrammarAction(const int commaSeparatedTypenames);
 int ClassBodyGrammarAction(const int content, const int next);
-int ClassBodyContentGrammarAction(const int acc, const int elem);
+int ClassBodyContentGrammarAction(const int acc, const int elem, const int inlineCode);
 int ClassConstructorGrammarAction(const int name, const int params);
 int ClassElementGrammarAction(const int mods, const int type, const int name, const int params);
 int InterfaceBodyGrammarAction(const int content, const int next);
-int InterfaceBodyContentGrammarAction(const int mods, const int type, const int name, const int params);
+int InterfaceBodyContentGrammarAction(const int mods, const int type, const int name, const int params, const int inlineCode);
 
 /* -V-------------------------------------- Methods --------------------------------------V- */
 
@@ -59,9 +59,9 @@ int CommaSeparatedTypenamesGrammarAction(const int type, const int next);
 
 /* -V-------------------------------------- Inlines --------------------------------------V- */
 
-int InlineContentPatternAction(const char* content);
-int InlineContentsPatternAction(const char* content, const int next);
-int InlineCodePatternAction(const int codeContents);
-int InlineCommentPatternAction(const int commentContents);
+int InlineContentGrammarAction(const char* content);
+int InlineContentsGrammarAction(const char* content, const int next);
+int InlineCodeGrammarAction(const int codeContents);
+int InlineCommentGrammarAction(const int commentContents);
 
 #endif
