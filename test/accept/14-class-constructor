@@ -1,15 +1,25 @@
 @startuml
 
 abstract class Empanada<Humita> {
+    - int hola
+
     Empanada()
-    Empanada(Int hola, int chau)
-    Empanadas(Pedro pedrito)
+    + Empanada(Int hola, int chau) /'
+        code:
+        super();
+        this.hola = chau;
+
+    '/
+
+    # Empanadas(Pedro pedrito)
 }
 
-class Brownie<Loco> {
+class Brownie<Loco> extends Empanada<Humita> {
+    # Pedro pedro
+
     Brauni()
     Brauni(Int<List<Object>> hola, int chau)
-    Brauni(Pedro<Capo> pedrito)
+    Brauni(Pedro<Capo> pedrito) 'code: this.pedro = pedrito;
 }
 
 @enduml

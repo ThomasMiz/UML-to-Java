@@ -1,0 +1,12 @@
+@startuml
+
+class Papalhorno {
+    String Monke() ' code: return "This code is fine";
+
+    ' comment: this comment is fine
+    /' comment: This comment is also fine '/
+}
+
+' comment: This comment is NOT fine.
+
+@enduml

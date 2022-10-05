@@ -1,0 +1,8 @@
+@startuml
+
+class Papalhorno {
+    'code: MonkeyFactory.Create(); // Crear monos
+    void Monke()
+}
+
+@enduml

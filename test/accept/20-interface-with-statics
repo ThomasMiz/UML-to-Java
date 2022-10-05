@@ -1,0 +1,10 @@
+@startuml
+
+interface Interface {
+    {static} void method1() 'code: Monkey monkey = new Monkey();
+    {static} final int monitosLocos 'code: 50;
+    
+    int method2()
+}
+
+@enduml
