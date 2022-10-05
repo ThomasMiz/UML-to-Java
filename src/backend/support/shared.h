@@ -12,7 +12,7 @@ extern FILE * yyout;
 
 // La cantidad de caracteres en el lexema "yytext". Se debe leer en las
 // acciones de Flex, no en Bison.
-extern int yyleng;
+// extern unsigned long yyleng;
 
 // Variable global que contiene el número de la línea analizada.
 extern int yylineno;
@@ -31,7 +31,6 @@ extern int yyparse();
 
 // Emular tipo "boolean".
 typedef enum {
-
 	false = 0,
 	true = 1
 } boolean;
