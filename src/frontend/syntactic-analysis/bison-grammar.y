@@ -53,6 +53,7 @@
 
 %token <token> INLINE_CODE
 %token <token> INLINE_COMMENT
+%token <token> INLINE_IMPORT
 
 %token <symbolName> INLINE_CONTENT
 %token <symbolName> SYMBOLNAME
@@ -91,6 +92,8 @@
 %type <string> inlineCode
 %type <string> inlineComment
 %type <string> maybeInlineCode
+%type <string> inlineImport
+%type <string> inlineImportList
 
 // Reglas de asociatividad y precedencia (de menor a mayor).
 // ((las borré todos))
@@ -107,12 +110,12 @@ uml: STARTUML umlBody[body] ENDUML uml[nextUml]						{ $$ = UmlGrammarAction($bo
 	| /* lambda */													{ $$ = 0; }
 	;
 
-umlBody: umlBodyContent[bodyContent] umlBody[nextBody]				{ $$ = UmlBodyGrammarAction($bodyContent, $nextBody); }
+umlBody: umlBodyContent[bodyContent] ENDLINE umlBody[nextBody]		{ $$ = UmlBodyGrammarAction($bodyContent, $nextBody); }
+	| ENDLINE umlBody[nextBody]										{ $$ = $nextBody; }
 	| /* lambda */													{ $$ = 0; }
 	;
 
-umlBodyContent: ENDLINE												{ $$ = 0; }
-	| classDefinition												{ $$ = $1; }
+umlBodyContent: classDefinition										{ $$ = $1; }
 	| abstractClassDefinition										{ $$ = $1; }
 	| interfaceDefinition											{ $$ = $1; }
 	;
@@ -139,9 +142,8 @@ classBody: classBodyContent[content] ENDLINE classBody[next]		{ $$ = ClassBodyGr
 	| /* lambda */													{ $$ = 0; }
 	;
 
-classBodyContent: maybeAccessModifier[acc] classElement[elem]
-																	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
-	| inlineComment[comment]										{ $$ = InlineCommentGrammarAction($comment); }
+classBodyContent: maybeAccessModifier[acc] classElement[elem]		{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
+	| inlineComment													{ $$ = $1; }
 	| /* lambda */													{ $$ = 0; }
 	;
 
@@ -169,7 +171,7 @@ abstractClassBody: abstractClassBodyContent[content] ENDLINE abstractClassBody[n
 abstractClassBodyContent: maybeAccessModifier[acc] classElement[elem]
 																	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| maybeAccessModifier[acc] abstractClassElement[elem]			{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
-	| inlineComment[comment]										{ $$ = InlineCommentGrammarAction($comment); }
+	| inlineComment													{ $$ = $1; }
     | /* lambda */													{ $$ = 0; }
 	;
 
@@ -198,9 +200,8 @@ interfaceBodyContent: abstractModifier[mods] typeName[type] symbolName[name] met
 																	{ $$ = InterfaceBodyContentGrammarAction($acc, $mods, $type, $name, 0, $code); }
 	| typeName[type] symbolName[name] methodParams[params] maybeInlineCode[code]
 																	{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, $params, $code); }
-	| typeName[type] symbolName[name] inlineCode[code]
-																	{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, 0, $code); }
-	| inlineComment[comment]										{ $$ = InlineCommentGrammarAction($comment); }
+	| typeName[type] symbolName[name] inlineCode[code]				{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, 0, $code); }
+	| inlineComment													{ $$ = $1; }
 	| /* lambda */													{ $$ = 0; }
 	;
 
@@ -269,6 +270,13 @@ inlineComment: INLINE_COMMENT inlineContents[commentContents]		{ $$ = InlineComm
 	;
 
 maybeInlineCode: inlineCode											{ $$ = $1; }
+	| /* lambda */													{ $$ = 0; }
+	;
+
+inlineImport: INLINE_IMPORT inlineContents[importContents]			{ $$ = InlineImportGrammarAction($importContents); }
+	;
+
+inlineImportList: inlineImport[import] ENDLINE inlineImportList[next] { $$ = InlineImportListGrammarAction($import, $next); }
 	| /* lambda */													{ $$ = 0; }
 	;
 

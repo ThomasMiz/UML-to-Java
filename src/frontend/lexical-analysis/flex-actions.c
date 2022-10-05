@@ -205,6 +205,12 @@ token StartInlineCommentPatternAction() {
 	return INLINE_COMMENT;
 }
 
+token StartInlineImportPatternAction() {
+	LogDebug("StartInlineImportPatternAction.");
+	yylval.token = INLINE_IMPORT;
+	return INLINE_IMPORT;
+}
+
 token InlineContentPatternAction(const char* lexeme, const int length) {
 	LogDebug("InlineContentPatternAction(%s, %d).", lexeme, length);
 	yylval.token = INLINE_CONTENT;

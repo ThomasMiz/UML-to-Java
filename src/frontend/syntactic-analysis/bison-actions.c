@@ -222,12 +222,23 @@ int InlineContentsGrammarAction(const char* content, const int next) {
 	return 1 + next;
 }
 
-int InlineCodeGrammarAction(const int codeContents) {
-	LogDebug("\tInlineCodeGrammarAction(%d)", codeContents);
-	return codeContents;
+int InlineCodeGrammarAction(const int content) {
+	LogDebug("\tInlineCodeGrammarAction(%d)", content);
+	return content;
 }
 
-int InlineCommentGrammarAction(const int commentContents) {
-	LogDebug("\tInlineCommentGrammarAction(%d)", commentContents);
-	return commentContents;
+int InlineCommentGrammarAction(const int content) {
+	LogDebug("\tInlineCommentGrammarAction(%d)", content);
+	return content;
 }
+
+int InlineImportGrammarAction(const int content) {
+	LogDebug("\tInlineCommentGrammarAction(%d)", content);
+	return content;
+}
+
+int InlineImportListGrammarAction(const int content, const int next) {
+	LogDebug("\tInlineCommentGrammarAction(%d, %d)", content, next);
+	return content + next;
+}
+

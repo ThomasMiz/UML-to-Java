@@ -61,7 +61,9 @@ int CommaSeparatedTypenamesGrammarAction(const int type, const int next);
 
 int InlineContentGrammarAction(const char* content);
 int InlineContentsGrammarAction(const char* content, const int next);
-int InlineCodeGrammarAction(const int codeContents);
-int InlineCommentGrammarAction(const int commentContents);
+int InlineCodeGrammarAction(const int content);
+int InlineCommentGrammarAction(const int content);
+int InlineImportGrammarAction(const int content);
+int InlineImportListGrammarAction(const int content, const int next);
 
 #endif

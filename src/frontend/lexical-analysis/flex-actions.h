@@ -67,6 +67,7 @@ token EndSinglelineInlinePatternAction();
 
 token StartInlineCodePatternAction();
 token StartInlineCommentPatternAction();
+token StartInlineImportPatternAction();
 token InlineContentPatternAction(const char* lexeme, const int length);
 
 #endif

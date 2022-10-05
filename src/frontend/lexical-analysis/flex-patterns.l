@@ -66,8 +66,10 @@ multilineInlineContent ([^\']|[\|\°\¬\!\"\#\$\%\&\/\(\)\=\?\¡\\\¿\+\*\~\[\]\
 
 <UML>"'"{maybeWhitespaceNoNewline}"code:"   { token t = StartInlineCodePatternAction(); BEGIN(SINGLELINE_INLINE); return t; }
 <UML>"'"{maybeWhitespaceNoNewline}"comment:" { token t = StartInlineCommentPatternAction(); BEGIN(SINGLELINE_INLINE); return t; }
+<UML>"'"{maybeWhitespaceNoNewline}"import:" { token t = StartInlineImportPatternAction(); BEGIN(SINGLELINE_INLINE); return t; }
 <UML>"/'"{maybeWhitespace}"code:"           { token t = StartInlineCodePatternAction(); BEGIN(MULTILINE_INLINE); return t; }
 <UML>"/'"{maybeWhitespace}"comment:"        { token t = StartInlineCommentPatternAction(); BEGIN(MULTILINE_INLINE); return t; }
+<UML>"/'"{maybeWhitespace}"import:"        { token t = StartInlineImportPatternAction(); BEGIN(MULTILINE_INLINE); return t; }
 <UML>"/'"                                   { StartMultilineCommentPatternAction(); BEGIN(MULTILINE_COMMENT); }
 <UML>"'"                                    { StartSinglelineCommentPatternAction(); BEGIN(SINGLELINE_COMMENT); }
 
