@@ -2,8 +2,6 @@
 
 # Compilador Flex/Bison
 
-Un compilador vacío de ejemplo construido con Flex y Bison.
-
 ## Requerimientos
 
 Para construir el compilador, se requieren las siguientes dependencias:
@@ -38,7 +36,13 @@ Luego se deberá abrir la solución generada `bin\Compiler.sln` con el IDE _Micr
 Para compilar un programa, primero cree un archivo vacío denominado `program` (o el nombre que desee), con el siguiente contenido:
 
 ```
-123123 + 123 - 2 * (454 + 890 / 89)
+@startuml
+
+class hola {
+    
+}
+
+@enduml
 ```
 
 Luego, ejecute el compilador desde el directorio raíz del proyecto, o desde cualquier otro lugar indicando el path hacia el script `start.sh` y pasando por parámetro el path hacia el programa a compilar:
@@ -53,7 +57,7 @@ En Windows:
 user@machine:path/ $ script\start.bat program
 ```
 
-Debería obtener el resultado correcto de evaluar el programa anterior: `122318`.
+Al correr el programa se debería obtener un mensaje diciendo que la compilación fue exitosa. Con el flag de debugging activado que se puede habilitar en `logger.h` se deberían observar en la consola los diferentes tokens del lenguaje que son parseados por Flex en el archivo.
 
 ## Testing
 
@@ -68,5 +72,3 @@ En Windows:
 ```bash
 user@machine:path/ $ script\test.bat
 ```
-
-Si desea agregar nuevos casos de uso, deberá crear un archivo por cada uno, que contenga el programa a testear dentro de las carpetas `test/accept` o `test/reject` según corresponda (es decir, si el mismo debe ser aceptado o rechazado por el compilador).
