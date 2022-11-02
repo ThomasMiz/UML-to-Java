@@ -22,25 +22,23 @@
 
 /* Patrones reutilizables. */
 symbolName      [a-zA-Z][a-zA-Z0-9_]*
-endline			[\n]
-whitespace		[ \f\n\r\t\v]
+endline         [\n]
+whitespace      [ \f\n\r\t\v]
 maybeWhitespace [ \f\n\r\t\v]*
 maybeWhitespaceNoNewline [ \f\r\t\v]*
 singlelineInlineContent ([^\'\n]|[\|\°\¬\!\"\#\$\%\&\/\(\)\=\?\¡\\\¿\+\*\~\[\]\{\}\^\-\_\:\;\.\,\>\<])*
 multilineInlineContent ([^\']|[\|\°\¬\!\"\#\$\%\&\/\(\)\=\?\¡\\\¿\+\*\~\[\]\{\}\^\-\_\:\;\.\,\>\<])*
 
-/* <UML>"/'"{maybeWhitespace}"import:"        { token t = StartInlineImportPatternAction(); BEGIN(MULTILINE_INLINE); return t; } */
-
 
 %%
-"@startuml"									{ BEGIN(UML); return StartUMLPatternAction(); }
+"@startuml"                                 { BEGIN(UML); return StartUMLPatternAction(); }
 "@enduml"                                   { return EndUMLPatternAction(); }
 .                                           { ; }
 {endline}                                   { ; }
 
 <UML>{endline}                              { return EndlinePatternAction(); }
 <UML>{whitespace}                           { ; }
-<UML>"@enduml"								{ token t = EndUMLPatternAction(); BEGIN(INITIAL); return t;  }
+<UML>"@enduml"                              { token t = EndUMLPatternAction(); BEGIN(INITIAL); return t;  }
 
 <UML>"class"                                { return ClassPatternAction(); }
 <UML>"interface"                            { return InterfacePatternAction(); }

@@ -1,5 +1,5 @@
-#ifndef BISON_ACTIONS_HEADER
-#define BISON_ACTIONS_HEADER
+#ifndef _BISON_ACTIONS_H_
+#define _BISON_ACTIONS_H_
 
 #include "../../backend/support/shared.h"
 #include "../../backend/semantic-analysis/abstract-syntax-tree.h"

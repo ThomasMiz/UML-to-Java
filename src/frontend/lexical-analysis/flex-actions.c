@@ -20,199 +20,199 @@
  */
 
 token StartUMLPatternAction() {
-	LogDebug("StartUMLPatternAction.");
-	yylval.token = STARTUML;
-	return STARTUML;
+    LogDebug("StartUMLPatternAction.");
+    yylval.token = STARTUML;
+    return STARTUML;
 }
 
 token EndUMLPatternAction() {
-	LogDebug("EndUMLPatternAction.");
-	yylval.token = ENDUML;
-	return ENDUML;
+    LogDebug("EndUMLPatternAction.");
+    yylval.token = ENDUML;
+    return ENDUML;
 }
 
 token EndlinePatternAction() {
-	LogDebug("EndlinePatternAction.");
-	yylval.token = ENDLINE;
-	return ENDLINE;
+    LogDebug("EndlinePatternAction.");
+    yylval.token = ENDLINE;
+    return ENDLINE;
 }
 
 /* ---------------------------------------------------- */
 
 token ClassPatternAction() {
-	LogDebug("ClassPatternAction.");
-	yylval.token = CLASS;
-	return CLASS;
+    LogDebug("ClassPatternAction.");
+    yylval.token = CLASS;
+    return CLASS;
 }
 
 token InterfacePatternAction() {
-	LogDebug("InterfacePatternAction.");
-	yylval.token = INTERFACE;
-	return INTERFACE;
+    LogDebug("InterfacePatternAction.");
+    yylval.token = INTERFACE;
+    return INTERFACE;
 }
 
 token ExtendsPatternAction() {
-	LogDebug("ExtendsPatternAction.");
-	yylval.token = EXTENDS;
-	return EXTENDS;
+    LogDebug("ExtendsPatternAction.");
+    yylval.token = EXTENDS;
+    return EXTENDS;
 }
 
 token ImplementsPatternAction() {
-	LogDebug("ImplementsPatternAction.");
-	yylval.token = IMPLEMENTS;
-	return IMPLEMENTS;
+    LogDebug("ImplementsPatternAction.");
+    yylval.token = IMPLEMENTS;
+    return IMPLEMENTS;
 }
 
 /* ---------------------------------------------------- */
 
 token StaticPatternAction() {
-	LogDebug("StaticPatternAction.");
-	yylval.token = STATIC;
-	return STATIC;
+    LogDebug("StaticPatternAction.");
+    yylval.token = STATIC;
+    return STATIC;
 }
 
 token AbstractPatternAction() {
-	LogDebug("AbstractPatternAction.");
-	yylval.token = ABSTRACT;
-	return ABSTRACT;
+    LogDebug("AbstractPatternAction.");
+    yylval.token = ABSTRACT;
+    return ABSTRACT;
 }
 
 token FinalPatternAction() {
-	LogDebug("FinalPatternAction.");
-	yylval.token = FINAL;
-	return FINAL;
+    LogDebug("FinalPatternAction.");
+    yylval.token = FINAL;
+    return FINAL;
 }
 
 /* ---------------------------------------------------- */
 
 token DefaultPatternAction() {
-	LogDebug("DefaultPatternAction.");
-	yylval.token = DEFAULT;
-	return DEFAULT;
+    LogDebug("DefaultPatternAction.");
+    yylval.token = DEFAULT;
+    return DEFAULT;
 }
 
 token PrivatePatternAction() {
-	LogDebug("PrivatePatternAction.");
-	yylval.token = PRIVATE;
-	return PRIVATE;
+    LogDebug("PrivatePatternAction.");
+    yylval.token = PRIVATE;
+    return PRIVATE;
 }
 
 token ProtectedPatternAction() {
-	LogDebug("ProtectedPatternAction.");
-	yylval.token = PROTECTED;
-	return PROTECTED;
+    LogDebug("ProtectedPatternAction.");
+    yylval.token = PROTECTED;
+    return PROTECTED;
 }
 
 token PublicPatternAction() {
-	LogDebug("PublicPatternAction.");
-	yylval.token = PUBLIC;
-	return PUBLIC;
+    LogDebug("PublicPatternAction.");
+    yylval.token = PUBLIC;
+    return PUBLIC;
 }
 
 /* ---------------------------------------------------- */
 
 token SymbolnamePatternAction(const char* lexeme, const int length) {
-	LogDebug("SymbolnamePatternAction(%s, %d).", lexeme, length);
-	strncpy(yylval.symbolName, lexeme, sizeof(yylval.symbolName)-1);
-	return SYMBOLNAME;
+    LogDebug("SymbolnamePatternAction(%s, %d).", lexeme, length);
+    strncpy(yylval.symbolName, lexeme, sizeof(yylval.symbolName) - 1);
+    return SYMBOLNAME;
 }
 
 token CommaPatternAction() {
-	LogDebug("CommaPatternAction.");
-	yylval.token = COMMA;
-	return COMMA;
+    LogDebug("CommaPatternAction.");
+    yylval.token = COMMA;
+    return COMMA;
 }
 
 /* ---------------------------------------------------- */
 
 token OpenBlockPatternAction() {
-	LogDebug("OpenBlockPatternAction.");
-	yylval.token = OPEN_BLOCK;
-	return OPEN_BLOCK;
+    LogDebug("OpenBlockPatternAction.");
+    yylval.token = OPEN_BLOCK;
+    return OPEN_BLOCK;
 }
 
 token CloseBlockPatternAction() {
-	LogDebug("CloseBlockPatternAction.");
-	yylval.token = CLOSE_BLOCK;
-	return CLOSE_BLOCK;
+    LogDebug("CloseBlockPatternAction.");
+    yylval.token = CLOSE_BLOCK;
+    return CLOSE_BLOCK;
 }
 
 token OpenParenthesisPatternAction() {
-	LogDebug("OpenParenthesisPatternAction.");
-	yylval.token = OPEN_PARENTHESIS;
-	return OPEN_PARENTHESIS;
+    LogDebug("OpenParenthesisPatternAction.");
+    yylval.token = OPEN_PARENTHESIS;
+    return OPEN_PARENTHESIS;
 }
 
 token CloseParenthesisPatternAction() {
-	LogDebug("CloseParenthesisPatternAction.");
-	yylval.token = CLOSE_PARENTHESIS;
-	return CLOSE_PARENTHESIS;
+    LogDebug("CloseParenthesisPatternAction.");
+    yylval.token = CLOSE_PARENTHESIS;
+    return CLOSE_PARENTHESIS;
 }
 
 token OpenGenericPatternAction() {
-	LogDebug("OpenGenericPatternAction.");
-	yylval.token = OPEN_GENERIC;
-	return OPEN_GENERIC;
+    LogDebug("OpenGenericPatternAction.");
+    yylval.token = OPEN_GENERIC;
+    return OPEN_GENERIC;
 }
 
 token CloseGenericPatternAction() {
-	LogDebug("CloseGenericPatternAction.");
-	yylval.token = CLOSE_GENERIC;
-	return CLOSE_GENERIC;
+    LogDebug("CloseGenericPatternAction.");
+    yylval.token = CLOSE_GENERIC;
+    return CLOSE_GENERIC;
 }
 
 /* ---------------------------------------------------- */
 
 void StartMultilineCommentPatternAction() {
-	LogDebug("StartMultilineCommentPatternAction.");
+    LogDebug("StartMultilineCommentPatternAction.");
 }
 
 void StartSinglelineCommentPatternAction() {
-	LogDebug("StartSinglelineCommentPatternAction.");
+    LogDebug("StartSinglelineCommentPatternAction.");
 }
 
 token EndSinglelineCommentPatternAction() {
-	LogDebug("EndSinglelineCommentPatternAction.");
-	yylval.token = ENDLINE;
-	return ENDLINE;
+    LogDebug("EndSinglelineCommentPatternAction.");
+    yylval.token = ENDLINE;
+    return ENDLINE;
 }
 
 void EndMultilineCommentPatternAction() {
-	LogDebug("EndMultilineCommentPatternAction.");
+    LogDebug("EndMultilineCommentPatternAction.");
 }
 
 void EndMultilineInlinePatternAction() {
-	LogDebug("EndMultilineInlinePatternAction.");
+    LogDebug("EndMultilineInlinePatternAction.");
 }
 
 token EndSinglelineInlinePatternAction() {
-	LogDebug("EndSinglelineInlinePatternAction.");
-	yylval.token = ENDLINE;
-	return ENDLINE;
+    LogDebug("EndSinglelineInlinePatternAction.");
+    yylval.token = ENDLINE;
+    return ENDLINE;
 }
 
 /* ---------------------------------------------------- */
 
 token StartInlineCodePatternAction() {
-	LogDebug("StartInlineCodePatternAction.");
-	yylval.token = INLINE_CODE;
-	return INLINE_CODE;
+    LogDebug("StartInlineCodePatternAction.");
+    yylval.token = INLINE_CODE;
+    return INLINE_CODE;
 }
 
 token StartInlineCommentPatternAction() {
-	LogDebug("StartInlineCommentPatternAction.");
-	yylval.token = INLINE_COMMENT;
-	return INLINE_COMMENT;
+    LogDebug("StartInlineCommentPatternAction.");
+    yylval.token = INLINE_COMMENT;
+    return INLINE_COMMENT;
 }
 
 token StartInlineImportPatternAction() {
-	LogDebug("StartInlineImportPatternAction.");
-	yylval.token = INLINE_IMPORT;
-	return INLINE_IMPORT;
+    LogDebug("StartInlineImportPatternAction.");
+    yylval.token = INLINE_IMPORT;
+    return INLINE_IMPORT;
 }
 
 token InlineContentPatternAction(const char* lexeme, const int length) {
-	LogDebug("InlineContentPatternAction(%s, %d).", lexeme, length);
-	yylval.token = INLINE_CONTENT;
-	return INLINE_CONTENT;
+    LogDebug("InlineContentPatternAction(%s, %d).", lexeme, length);
+    yylval.token = INLINE_CONTENT;
+    return INLINE_CONTENT;
 }
