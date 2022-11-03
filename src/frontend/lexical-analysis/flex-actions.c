@@ -112,8 +112,12 @@ token PublicPatternAction() {
 /* ---------------------------------------------------- */
 
 token SymbolnamePatternAction(const char* lexeme, const int length) {
-    LogDebug("SymbolnamePatternAction(%s, %d).", lexeme, length);
-    strncpy(yylval.symbolName, lexeme, sizeof(yylval.symbolName) - 1);
+    char* s = malloc(length + 1);
+    memcpy(s, lexeme, length);
+    s[length] = '\0';
+
+    LogDebug("SymbolnamePatternAction(%s, %d).", s, length);
+    yylval.string = s;
     return SYMBOLNAME;
 }
 
@@ -212,7 +216,11 @@ token StartInlineImportPatternAction() {
 }
 
 token InlineContentPatternAction(const char* lexeme, const int length) {
-    LogDebug("InlineContentPatternAction(%s, %d).", lexeme, length);
-    yylval.token = INLINE_CONTENT;
+    char* s = malloc(length + 1);
+    memcpy(s, lexeme, length);
+    s[length] = '\0';
+
+    LogDebug("InlineContentPatternAction(%s, %d).", s, length);
+    yylval.string = s;
     return INLINE_CONTENT;
 }

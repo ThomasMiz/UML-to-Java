@@ -11,59 +11,54 @@
  * abstracta (i.e., el AST).
  */
 
-// Programa.
-int StartGrammarAction(const int uml);
-int UmlGrammarAction(const int body, const int nextUml);
-int UmlBodyGrammarAction(const int classDef, const int body);
+int StartGrammarAction(const TUml* uml);
+const TUml* UmlGrammarAction(const TUmlBody* body, const TUml* next);
+const TUmlBody* UmlBodyGrammarAction(const TClassDefinition* classDefinition, const TUmlBody* next);
 
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */
 
-int ClassDefinitionGrammarAction(const int name, const int ext, const int imp, const int imports, const int body);
-int InterfaceDefinitionGrammarAction(const int name, const int ext, const int imports, const int body);
-int ExtendsGrammarAction(const int type);
-int ImplementsGrammarAction(const int commaSeparatedTypenames);
-int ClassBodyGrammarAction(const int content, const int next);
-int ClassBodyContentGrammarAction(const int acc, const int elem);
-int ClassConstructorGrammarAction(const int name, const int params, const int inlineCode);
-int ClassElementGrammarAction(const int mods, const int type, const int name, const int params, const int inlineCode);
-int InterfaceBodyGrammarAction(const int content, const int next);
-int InterfaceBodyContentGrammarAction(const int acc, const int mods, const int type, const int name, const int params, const int inlineCode);
+const TClassDefinition* ClassDefinitionGrammarAction(const TTypeName* name, const TTypeName* extends, const TCommaSeparatedTypenames* implements, const TInlineImportList* imports, const TClassBody* body);
+const TClassDefinition* InterfaceDefinitionGrammarAction(const TTypeName* name, const TTypeName* extends, const TInlineImportList* imports, const TClassBody* body);
+const TTypeName* ExtendsGrammarAction(const TTypeName* type);
+const TCommaSeparatedTypenames* ImplementsGrammarAction(const TCommaSeparatedTypenames* commaSeparatedTypenames);
+const TClassBody* ClassBodyGrammarAction(TClassBody* body, const TClassBody* next);
+TClassBody* ClassBodyContentGrammarAction(const TAccessModifiers accessMods, TClassElement* element);
+TClassBody* ClassInlineCommentGrammarAction(const TInlineContent* content);
+TClassElement* ClassConstructorGrammarAction(const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode);
+TClassElement* ClassElementGrammarAction(const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode);
+const TClassBody* InterfaceBodyGrammarAction(TClassBody* body, const TClassBody* next);
+TClassBody* InterfaceBodyContentGrammarAction(const TAccessModifiers accessMods, const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode);
 
 /* -V-------------------------------------- Methods --------------------------------------V- */
 
-int ClassMethodGrammarAction(const int mods, const int type, const int name, const int params);
-int InterfaceMethodGrammarAction(const int mods, const int type, const int name, const int params);
-int MethodParamsGrammarAction(const int paramList);
-int ParameterGrammarAction(const int type, const int name);
-int ParameterListGrammarAction(const int type, const int name, const int next);
+const TMethodParameterList* MethodParamsGrammarAction(const TParameterList* paramList);
+const TParameterList* ParameterGrammarAction(const TTypeName* type, const char* name);
+const TParameterList* ParameterListGrammarAction(const TTypeName* type, const char* name, const TParameterList* next);
 
-/* -V-------------------------------------- Variables --------------------------------------V- */
+/* -V-------------------------------------- Modifiers --------------------------------------V- */
 
-int ClassVariableGrammarAction(const int mods, const int type, const int name);
-int InterfaceVariableGrammarAction(const int mods, const int type, const int name);
-int DefaultGrammarAction();
-int PrivateGrammarAction();
-int ProtectedGrammarAction();
-int PublicGrammarAction();
-int AbstractGrammarAction();
-int StaticGrammarAction();
-int FinalGrammarAction();
+TAccessModifiers DefaultGrammarAction();
+TAccessModifiers PrivateGrammarAction();
+TAccessModifiers ProtectedGrammarAction();
+TAccessModifiers PublicGrammarAction();
+TElementModifiers AbstractGrammarAction();
+TElementModifiers StaticGrammarAction();
+TElementModifiers FinalGrammarAction();
 
 /* -V-------------------------------------- Misc --------------------------------------V- */
 
-int SymbolnameGrammarAction(const char* symbol);
-int TypenameGrammarAction(const char* name);
-int GenericTypenameGrammarAction(const char* name, const int genericType);
-int CommaSeparatedTypenameGrammarAction(const int type);
-int CommaSeparatedTypenamesGrammarAction(const int type, const int next);
-
+const char* SymbolnameGrammarAction(const char* symbol);
+const TTypeName* TypenameGrammarAction(const char* name);
+const TTypeName* GenericTypenameGrammarAction(const char* name, const TCommaSeparatedTypenames* genericType);
+const TCommaSeparatedTypenames* CommaSeparatedTypenameGrammarAction(const TTypeName* type);
+const TCommaSeparatedTypenames* CommaSeparatedTypenamesGrammarAction(const TTypeName* type, const TCommaSeparatedTypenames* next);
 /* -V-------------------------------------- Inlines --------------------------------------V- */
 
-int InlineContentGrammarAction(const char* content);
-int InlineContentsGrammarAction(const char* content, const int next);
-int InlineCodeGrammarAction(const int content);
-int InlineCommentGrammarAction(const int content);
-int InlineImportGrammarAction(const int content);
-int InlineImportListGrammarAction(const int content, const int next);
+const TInlineContent* InlineContentGrammarAction(const char* content);
+const TInlineContent* InlineContentsGrammarAction(const char* content, const TInlineContent* next);
+const TInlineContent* InlineCodeGrammarAction(const TInlineContent* content);
+const TInlineContent* InlineCommentGrammarAction(const TInlineContent* content);
+const TInlineContent* InlineImportGrammarAction(const TInlineContent* content);
+const TInlineImportList* InlineImportListGrammarAction(const TInlineContent* content, const TInlineImportList* next);
 
 #endif

@@ -1,56 +1,102 @@
 #ifndef _ABSTRACT_SYNTAX_TREE_H_
 #define _ABSTRACT_SYNTAX_TREE_H_
 
-/**
- * Se realiza este tipo de definiciones cuando el tipo de dato debe
- * auto-referenciarse, como es el caso de una "Expression", que está compuesta
- * de otras 2 expresiones.
- */
-typedef struct Expression Expression;
+/* -V-------------------------------------- Inlines --------------------------------------V- */
 
-/**
- * Para cada no-terminal se define una nueva estructura que representa su tipo
- * de dato y, por lo tanto, su nodo en el AST (Árbol de Sintaxis Abstracta).
- */
-typedef struct {
-    int value;
-} Constant;
+typedef struct TInlineContent {
+    const char* content;
+    const struct TInlineContent* next;
+} TInlineContent;
 
-/**
- * En caso de que un no-terminal ("Factor" en este caso), posea más de una
- * regla de producción asociada, se crea además de la estructura un enumerado
- * que identitifque cada reducción posible (cada regla de producción). Luego,
- * se agrega una instancia de este enumerado dentro del nodo del no-terminal.
- *
- * De este modo, al recorrer el AST, es posible determinar qué nodos hijos
- * posee según el valor de este enumerado.
- */
-typedef enum {
-    EXPRESSION,
-    CONSTANT
-} FactorType;
+typedef struct TInlineImportList {
+    const TInlineContent* import;
+    const struct TInlineImportList* next;
+} TInlineImportList;
 
-typedef struct {
-    FactorType type;
-    Expression* expression;
-} Factor;
+/* -V-------------------------------------- General --------------------------------------V- */
 
-typedef enum {
-    ADDITION,
-    SUBTRACTION,
-    MULTIPLICATION,
-    DIVISION,
-    FACTOR
-} ExpressionType;
-
-struct Expression {
-    ExpressionType type;
-    Expression* leftExpression;
-    Expression* rightExpression;
+struct TCommaSeparatedTypenames {
+    const struct TTypeName* typeName;
+    const struct TCommaSeparatedTypenames* next;
 };
 
-typedef struct {
-    Expression* expression;
-} Program;
+struct TTypeName {
+    const char* symbolName;
+    const struct TCommaSeparatedTypenames* genericType;
+};
+
+typedef struct TCommaSeparatedTypenames TCommaSeparatedTypenames;
+typedef struct TTypeName TTypeName;
+
+/* -V-------------------------------------- Class Elements --------------------------------------V- */
+
+typedef enum {
+    EMODS_NONE = 0,
+    EMODS_STATIC = 1 << 0,
+    EMODS_ABSTRACT = 1 << 1,
+    EMODS_FINAL = 1 << 2
+} TElementModifiers;
+
+typedef enum {
+    AMODS_NONE = 0,
+    AMODS_DEFAULT = 1 << 0,
+    AMODS_PRIVATE = 1 << 1,
+    AMODS_PROTECTED = 1 << 2,
+    AMODS_PUBLIC = 1 << 3
+} TAccessModifiers;
+
+typedef struct TParameterList {
+    const TTypeName* typeName;
+    const char* symbolName;
+    const struct TParameterList* next;
+} TParameterList;
+
+typedef struct TMethodParameterList {
+    const TParameterList* parameterList;
+} TMethodParameterList;
+
+/* -V-------------------------------------- Classes (& Interfaces) --------------------------------------V- */
+
+typedef struct TClassElement {
+    TAccessModifiers accessModifiers;
+    TElementModifiers elementModifiers;
+    const TTypeName* typeName;
+    const char* symbolName;
+    const TMethodParameterList* parameterList;
+    const TInlineContent* inlineCode;
+} TClassElement;
+
+typedef struct TClassBody {
+    const TClassElement* element;
+    const TInlineContent* comment;
+    const struct TClassBody* next;
+} TClassBody;
+
+typedef enum {
+    CTYPE_CLASS = 0,
+    CTYPE_ABSTRACTCLASS,
+    CTYPE_INTERFACE
+} TClassType;
+
+typedef struct TClassDefinition {
+    TClassType type;
+    const TTypeName* name;
+    const TTypeName* extends;
+    const TCommaSeparatedTypenames* implements;
+    const TInlineImportList* imports;
+    const TClassBody* body;
+} TClassDefinition;
+
+/* -V-------------------------------------- UML --------------------------------------V- */
+
+typedef struct TUmlBody {
+    const TClassDefinition* bodyContent;
+    const struct TUmlBody* next;
+} TUmlBody;
+
+typedef struct TUml {
+    const TUmlBody* body;
+    const struct TUml* next;
+} TUml;
 
 #endif

@@ -2,6 +2,7 @@
 #include "../../backend/support/logger.h"
 #include "bison-actions.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /**
@@ -28,8 +29,8 @@ void yyerror(const char* string) {
  * indica que efectivamente el programa de entrada se pudo generar con esta
  * gramática, o lo que es lo mismo, que el programa pertenece al lenguaje.
  */
-int StartGrammarAction(const int uml) {
-    LogDebug("\tStartGrammarAction(%d)", uml);
+int StartGrammarAction(const TUml* uml) {
+    LogDebug("\tStartGrammarAction(%lu)", uml);
     /*
      * "state" es una variable global que almacena el estado del compilador,
      * cuyo campo "succeed" indica si la compilación fue o no exitosa, la cual
@@ -43,201 +44,276 @@ int StartGrammarAction(const int uml) {
      * la expresión se computa on-the-fly, y es la razón por la cual esta
      * variable es un simple entero, en lugar de un nodo.
      */
-    state.result = uml;
+    state.result = 420;
+    state.program = uml;
     return state.result;
 }
 
-int UmlGrammarAction(const int body, const int nextUml) {
-    LogDebug("\tUmlGrammarAction(%d, %d)", body, nextUml);
-    return body + nextUml;
+const TUml* UmlGrammarAction(const TUmlBody* body, const TUml* next) {
+    LogDebug("\tUmlGrammarAction(%lu, %lu)", body, next);
+    TUml* node = malloc(sizeof(TUml));
+    node->body = body;
+    node->next = next;
+    return node;
 }
 
-int UmlBodyGrammarAction(const int classDef, const int body) {
-    LogDebug("\tUmlBodyGrammarAction(%d, %d)", classDef, body);
-    return classDef + body;
+const TUmlBody* UmlBodyGrammarAction(const TClassDefinition* classDefinition, const TUmlBody* next) {
+    LogDebug("\tUmlBodyGrammarAction(%lu, %lu)", classDefinition, next);
+    TUmlBody* node = malloc(sizeof(TUmlBody));
+    node->bodyContent = classDefinition;
+    node->next = next;
+    return node;
 }
 
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */
 
-int ClassDefinitionGrammarAction(const int name, const int ext, const int imp, const int imports, const int body) {
-    LogDebug("\tClassDefinitionGrammarAction(%d, %d, %d, %d, %d)", name, ext, imp, imports, body);
-    return name + ext + imp + imports + body;
+const TClassDefinition* ClassDefinitionGrammarAction(const TTypeName* name, const TTypeName* extends, const TCommaSeparatedTypenames* implements, const TInlineImportList* imports, const TClassBody* body) {
+    LogDebug("\tClassDefinitionGrammarAction(%s, %lu, %lu, %lu, %lu)", name, extends, implements, imports, body);
+    TClassDefinition* node = malloc(sizeof(TClassDefinition));
+    node->name = name;
+    node->type = CTYPE_CLASS;
+    node->extends = extends;
+    node->implements = implements;
+    node->imports = imports;
+    node->body = body;
+    return node;
 }
 
-int InterfaceDefinitionGrammarAction(const int name, const int ext, const int imports, const int body) {
-    LogDebug("\tInterfaceDefinitionGrammarAction(%d, %d, %d, %d)", name, ext, imports, body);
-    return name + ext + imports + body;
+const TClassDefinition* InterfaceDefinitionGrammarAction(const TTypeName* name, const TTypeName* extends, const TInlineImportList* imports, const TClassBody* body) {
+    LogDebug("\tInterfaceDefinitionGrammarAction(%s, %lu, %lu, %lu)", name, extends, imports, body);
+    TClassDefinition* node = malloc(sizeof(TClassDefinition));
+    node->name = name;
+    node->type = CTYPE_INTERFACE;
+    node->extends = extends;
+    node->implements = NULL;
+    node->imports = imports;
+    node->body = body;
+    return node;
 }
 
-int ExtendsGrammarAction(const int type) {
-    LogDebug("\tExtendsGrammarAction(%d)", type);
+const TTypeName* ExtendsGrammarAction(const TTypeName* type) {
+    LogDebug("\tExtendsGrammarAction(%lu)", type);
     return type;
 }
 
-int ImplementsGrammarAction(const int commaSeparatedTypenames) {
-    LogDebug("\tImplementsGrammarAction(%d)", commaSeparatedTypenames);
+const TCommaSeparatedTypenames* ImplementsGrammarAction(const TCommaSeparatedTypenames* commaSeparatedTypenames) {
+    LogDebug("\tImplementsGrammarAction(%lu)", commaSeparatedTypenames);
     return commaSeparatedTypenames;
 }
 
-int ClassBodyGrammarAction(const int content, const int next) {
-    LogDebug("\tClassBodyGrammarAction(%d, %d)", content, next);
-    return content + next;
+const TClassBody* ClassBodyGrammarAction(TClassBody* body, const TClassBody* next) {
+    LogDebug("\tClassBodyGrammarAction(%lu, %lu)", body, next);
+    body->next = next;
+    return body;
 }
 
-int ClassBodyContentGrammarAction(const int acc, const int elem) {
-    LogDebug("\tClassBodyContentGrammarAction(%d, %d)", acc, elem);
-    return acc + elem;
+TClassBody* ClassBodyContentGrammarAction(const TAccessModifiers accessMods, TClassElement* element) {
+    LogDebug("\tClassBodyContentGrammarAction(%d, %lu)", accessMods, element);
+    element->accessModifiers = accessMods;
+    TClassBody* node = malloc(sizeof(TClassBody));
+    node->comment = NULL;
+    node->element = element;
+    node->next = NULL;
+    return node;
 }
 
-int ClassConstructorGrammarAction(const int name, const int params, const int inlineCode) {
+TClassBody* ClassInlineCommentGrammarAction(const TInlineContent* content) {
+    LogDebug("\tClassInlineCommentGrammarAction(%lu)", content);
+    TClassBody* node = malloc(sizeof(TClassBody));
+    node->comment = content;
+    node->element = NULL;
+    node->next = NULL;
+    return node;
+}
+
+TClassElement* ClassConstructorGrammarAction(const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode) {
     LogDebug("\tClassConstructorGrammarAction(%d, %d, %d)", name, params, inlineCode);
-    return name + params + inlineCode;
+    TClassElement* node = malloc(sizeof(TClassElement));
+    node->accessModifiers = AMODS_NONE;
+    node->elementModifiers = AMODS_NONE;
+    node->typeName = NULL;
+    node->symbolName = name;
+    node->parameterList = params;
+    node->inlineCode = inlineCode;
+    return node;
 }
 
-int ClassElementGrammarAction(const int mods, const int type, const int name, const int params, const int inlineCode) {
-    LogDebug("\tClassElementGrammarAction(%d, %d, %d, %d, %d)", mods, type, name, params, inlineCode);
-    return mods + type + name + params + inlineCode;
+TClassElement* ClassElementGrammarAction(const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode) {
+    LogDebug("\tClassElementGrammarAction(%d, %lu, %lu, %lu, %lu)", elementMods, type, name, params, inlineCode);
+    TClassElement* node = malloc(sizeof(TClassElement));
+    node->accessModifiers = AMODS_NONE;
+    node->elementModifiers = elementMods;
+    node->typeName = type;
+    node->symbolName = name;
+    node->parameterList = params;
+    node->inlineCode = inlineCode;
+    return node;
 }
 
-int InterfaceBodyGrammarAction(const int content, const int next) {
-    LogDebug("\tInterfaceBodyGrammarAction(%d, %d)", content, next);
-    return content + next;
+const TClassBody* InterfaceBodyGrammarAction(TClassBody* body, const TClassBody* next) {
+    LogDebug("\tInterfaceBodyGrammarAction(%lu, %lu)", body, next);
+    body->next = next;
+    return body;
 }
 
-int InterfaceBodyContentGrammarAction(const int acc, const int mods, const int type, const int name, const int params, const int inlineCode) {
-    LogDebug("\tInterfaceBodyContentGrammarAction(%d, %d, %d, %d, %d, %d)", acc, mods, type, name, params, inlineCode);
-    return acc + mods + type + name + params + inlineCode;
+TClassBody* InterfaceBodyContentGrammarAction(const TAccessModifiers accessMods, const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode) {
+    LogDebug("\tInterfaceBodyContentGrammarAction(%d, %d, %lu, %lu, %lu, %lu)", accessMods, elementMods, type, name, params, inlineCode);
+    TClassElement* node = malloc(sizeof(TClassElement));
+    node->accessModifiers = accessMods;
+    node->elementModifiers = elementMods;
+    node->typeName = type;
+    node->symbolName = name;
+    node->parameterList = params;
+    node->inlineCode = inlineCode;
+
+    TClassBody* body = malloc(sizeof(TClassBody));
+    body->comment = NULL;
+    body->element = node;
+    body->next = NULL;
+
+    return body;
 }
 
 /* -V-------------------------------------- Methods --------------------------------------V- */
 
-int ClassMethodGrammarAction(const int mods, const int type, const int name, const int params) {
-    LogDebug("\tClassMethodGrammarAction(%d, %d, %d, %d)", mods, type, name, params);
-    return mods + type + name + params;
+const TMethodParameterList* MethodParamsGrammarAction(const TParameterList* paramList) {
+    LogDebug("\tMethodParamsGrammarAction(%lu)", paramList);
+    TMethodParameterList* node = malloc(sizeof(TMethodParameterList));
+    node->parameterList = paramList;
+    return node;
 }
 
-int InterfaceMethodGrammarAction(const int mods, const int type, const int name, const int params) {
-    LogDebug("\tInterfaceMethodGrammarAction(%d, %d, %d, %d)", mods, type, name, params);
-    return mods + type + name + params;
+const TParameterList* ParameterGrammarAction(const TTypeName* type, const char* name) {
+    LogDebug("\tParameterGrammarAction(%lu, %lu)", type, name);
+    TParameterList* node = malloc(sizeof(TParameterList));
+    node->typeName = type;
+    node->symbolName = name;
+    node->next = NULL;
+    return node;
 }
 
-int MethodParamsGrammarAction(const int paramList) {
-    LogDebug("\tMethodParamsGrammarAction(%d)", paramList);
-    return paramList;
+const TParameterList* ParameterListGrammarAction(const TTypeName* type, const char* name, const TParameterList* next) {
+    LogDebug("\tParameterListGrammarAction(%lu, %lu, %lu)", type, name, next);
+    TParameterList* node = malloc(sizeof(TParameterList));
+    node->typeName = type;
+    node->symbolName = name;
+    node->next = next;
+    return node;
 }
 
-int ParameterGrammarAction(const int type, const int name) {
-    LogDebug("\tParameterGrammarAction(%d, %d)", type, name);
-    return type + name;
-}
+/* -V-------------------------------------- Modifiers --------------------------------------V- */
 
-int ParameterListGrammarAction(const int type, const int name, const int next) {
-    LogDebug("\tParameterListGrammarAction(%d, %d, %d)", type, name, next);
-    return type + name + next;
-}
-
-/* -V-------------------------------------- Variables --------------------------------------V- */
-
-int ClassVariableGrammarAction(const int mods, const int type, const int name) {
-    LogDebug("\tClassVariableGrammarAction(%d, %d, %d)", mods, type, name);
-    return mods + type + name;
-}
-
-int InterfaceVariableGrammarAction(const int mods, const int type, const int name) {
-    LogDebug("\tInterfaceVariableGrammarAction(%d, %d, %d)", mods, type, name);
-    return mods + type + name;
-}
-
-int DefaultGrammarAction() {
+TAccessModifiers DefaultGrammarAction() {
     LogDebug("\tDefaultGrammarAction()");
-    return 1;
+    return AMODS_DEFAULT;
 }
 
-int PrivateGrammarAction() {
+TAccessModifiers PrivateGrammarAction() {
     LogDebug("\tPrivateGrammarAction()");
-    return 1;
+    return AMODS_PRIVATE;
 }
 
-int ProtectedGrammarAction() {
+TAccessModifiers ProtectedGrammarAction() {
     LogDebug("\tProtectedGrammarAction()");
-    return 1;
+    return AMODS_PROTECTED;
 }
 
-int PublicGrammarAction() {
+TAccessModifiers PublicGrammarAction() {
     LogDebug("\tPublicGrammarAction()");
-    return 1;
+    return AMODS_PUBLIC;
 }
 
-int AbstractGrammarAction() {
+TElementModifiers AbstractGrammarAction() {
     LogDebug("\tAbstractGrammarAction()");
-    return 1;
+    return EMODS_ABSTRACT;
 }
 
-int StaticGrammarAction() {
+TElementModifiers StaticGrammarAction() {
     LogDebug("\tStaticGrammarAction()");
-    return 1;
+    return EMODS_STATIC;
 }
 
-int FinalGrammarAction() {
+TElementModifiers FinalGrammarAction() {
     LogDebug("\tFinalGrammarAction()");
-    return 1;
+    return EMODS_FINAL;
 }
 
 /* -V-------------------------------------- Misc --------------------------------------V- */
 
-int SymbolnameGrammarAction(const char* symbol) {
+const char* SymbolnameGrammarAction(const char* symbol) {
     LogDebug("\tSymbolnameGrammarAction(%s)", symbol);
-    return 1;
+    return symbol;
 }
 
-int TypenameGrammarAction(const char* name) {
+const TTypeName* TypenameGrammarAction(const char* name) {
     LogDebug("\tTypenameGrammarAction(%s)", name);
-    return 1;
+    TTypeName* node = malloc(sizeof(TTypeName));
+    node->symbolName = name;
+    node->genericType = NULL;
+    return node;
 }
 
-int GenericTypenameGrammarAction(const char* name, const int genericType) {
-    LogDebug("\tGenericTypenameGrammarAction(%s, %d)", name, genericType);
-    return 1 + genericType;
+const TTypeName* GenericTypenameGrammarAction(const char* name, const TCommaSeparatedTypenames* genericType) {
+    LogDebug("\tGenericTypenameGrammarAction(%s, %lu)", name, genericType);
+    TTypeName* node = malloc(sizeof(TTypeName));
+    node->symbolName = name;
+    node->genericType = genericType;
+    return node;
 }
 
-int CommaSeparatedTypenameGrammarAction(const int type) {
-    LogDebug("\tCommaSeparatedTypenameGrammarAction(%d)", type);
-    return type;
+const TCommaSeparatedTypenames* CommaSeparatedTypenameGrammarAction(const TTypeName* type) {
+    LogDebug("\tCommaSeparatedTypenameGrammarAction(%lu)", type);
+    TCommaSeparatedTypenames* node = malloc(sizeof(TCommaSeparatedTypenames));
+    node->typeName = type;
+    node->next = NULL;
+    return node;
 }
 
-int CommaSeparatedTypenamesGrammarAction(const int type, const int next) {
-    LogDebug("\tCommaSeparatedTypenamesGrammarAction(%d, %d)", type, next);
-    return type + next;
+const TCommaSeparatedTypenames* CommaSeparatedTypenamesGrammarAction(const TTypeName* type, const TCommaSeparatedTypenames* next) {
+    LogDebug("\tCommaSeparatedTypenamesGrammarAction(%lu, %lu)", type, next);
+    TCommaSeparatedTypenames* node = malloc(sizeof(TCommaSeparatedTypenames));
+    node->typeName = type;
+    node->next = next;
+    return node;
 }
 
 /* -V-------------------------------------- Inlines --------------------------------------V- */
 
-int InlineContentGrammarAction(const char* content) {
+const TInlineContent* InlineContentGrammarAction(const char* content) {
     LogDebug("\tInlineContentGrammarAction(%s)", content);
-    return 1;
+    TInlineContent* node = malloc(sizeof(TInlineContent));
+    node->content = content;
+    node->next = NULL;
+    return node;
 }
 
-int InlineContentsGrammarAction(const char* content, const int next) {
-    LogDebug("\tInlineContentsGrammarAction(%s, %d)", content, next);
-    return 1 + next;
+const TInlineContent* InlineContentsGrammarAction(const char* content, const TInlineContent* next) {
+    LogDebug("\tInlineContentsGrammarAction(%s, %lu)", content, next);
+    TInlineContent* node = malloc(sizeof(TInlineContent));
+    node->content = content;
+    node->next = next;
+    return node;
 }
 
-int InlineCodeGrammarAction(const int content) {
-    LogDebug("\tInlineCodeGrammarAction(%d)", content);
+const TInlineContent* InlineCodeGrammarAction(const TInlineContent* content) {
+    LogDebug("\tInlineCodeGrammarAction(%lu)", content);
     return content;
 }
 
-int InlineCommentGrammarAction(const int content) {
-    LogDebug("\tInlineCommentGrammarAction(%d)", content);
+const TInlineContent* InlineCommentGrammarAction(const TInlineContent* content) {
+    LogDebug("\tInlineCommentGrammarAction(%lu)", content);
     return content;
 }
 
-int InlineImportGrammarAction(const int content) {
-    LogDebug("\tInlineCommentGrammarAction(%d)", content);
+const TInlineContent* InlineImportGrammarAction(const TInlineContent* content) {
+    LogDebug("\tInlineImportGrammarAction(%lu)", content);
     return content;
 }
 
-int InlineImportListGrammarAction(const int content, const int next) {
-    LogDebug("\tInlineCommentGrammarAction(%d, %d)", content, next);
-    return content + next;
+const TInlineImportList* InlineImportListGrammarAction(const TInlineContent* content, const TInlineImportList* next) {
+    LogDebug("\tInlineImportListGrammarAction(%lu, %lu)", content, next);
+    TInlineImportList* node = malloc(sizeof(TInlineImportList));
+    node->import = content;
+    node->next = next;
+    return node;
 }

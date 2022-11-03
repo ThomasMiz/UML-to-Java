@@ -48,7 +48,7 @@ typedef struct {
     int result;
 
     // El nodo raíz del AST (se usará cuando se implemente el backend).
-    Program* program;
+    const TUml* program;
 
     // Agregar lo que sea necesario para el compilador.
     // Agregar una pila para manipular scopes.

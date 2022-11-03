@@ -7,20 +7,30 @@
 // Tipos de dato utilizados en las variables semánticas ($$, $1, $2, etc.).
 %union {
 	// No-terminales (backend).
-	/*
-	Program program;
-	Expression expression;
-	Factor factor;
-	Constant constant;
-	...
-	*/
+	const TInlineContent* inlineContent;
+	const TInlineImportList* inlineImportList;
+	const TCommaSeparatedTypenames* commaSeparatedTypenames;
+	const TTypeName* typeName;
+	TElementModifiers elementModifiers;
+	TAccessModifiers accessModifiers;
+	const TParameterList* parameterList;
+	const TMethodParameterList* methodParameterList;
+	const TClassElement* classElement;
+	TClassElement* classElementIncomplete;
+	const TClassBody* classBody;
+	TClassBody* classBodyIncomplete;
+	const TClassType* classType;
+	const TClassDefinition* classDefinition;
+	const TUmlBody* umlBody;
+	const TUml* uml;
 
 	// No-terminales (frontend).
-	int string;
+	// int string; // No puedo borrar esta línea, es preciosa
+	int resultCode;
 
 	// Terminales.
 	token token;
-	char symbolName[33];
+	const char* string;
 }
 
 // IDs y tipos de los tokens terminales generados desde Flex.
@@ -55,45 +65,45 @@
 %token <token> INLINE_COMMENT
 %token <token> INLINE_IMPORT
 
-%token <symbolName> INLINE_CONTENT
-%token <symbolName> SYMBOLNAME
+%token <string> INLINE_CONTENT
+%token <string> SYMBOLNAME
 
 // Tipos de dato para los no-terminales generados desde Bison.
-%type <string> start
-%type <string> uml
-%type <string> umlBody
-%type <string> umlBodyContent
-%type <string> classDefinition
-%type <string> interfaceDefinition
-%type <string> extends
-%type <string> implements
-%type <string> classBody
-%type <string> classBodyContent
-%type <string> classElement
-%type <string> abstractClassDefinition
-%type <string> abstractClassBody
-%type <string> abstractClassBodyContent
-%type <string> abstractClassElement
-%type <string> interfaceBody
-%type <string> interfaceBodyContent
-%type <string> maybeMethodParams
-%type <string> methodParams
-%type <string> parameterList
-%type <string> abstractModifier
-%type <string> staticModifier
-%type <string> staticXorFinalModifier
-%type <string> staticAndFinalModifiers
-%type <string> accessModifier
-%type <string> maybeAccessModifier
+%type <resultCode> start
+%type <uml> uml
+%type <umlBody> umlBody
+%type <classDefinition> umlBodyContent
+%type <classDefinition> classDefinition
+%type <classDefinition> interfaceDefinition
+%type <typeName> extends
+%type <commaSeparatedTypenames> implements
+%type <classBody> classBody
+%type <classBodyIncomplete> classBodyContent
+%type <classElementIncomplete> classElement
+%type <classDefinition> abstractClassDefinition
+%type <classBody> abstractClassBody
+%type <classBodyIncomplete> abstractClassBodyContent
+%type <classElementIncomplete> abstractClassElement
+%type <classBody> interfaceBody
+%type <classBodyIncomplete> interfaceBodyContent
+%type <methodParameterList> maybeMethodParams
+%type <methodParameterList> methodParams
+%type <parameterList> parameterList
+%type <elementModifiers> abstractModifier
+%type <elementModifiers> staticModifier
+%type <elementModifiers> staticXorFinalModifier
+%type <elementModifiers> staticAndFinalModifiers
+%type <accessModifiers> accessModifier
+%type <accessModifiers> maybeAccessModifier
 %type <string> symbolName
-%type <string> typeName
-%type <string> commaSeparatedTypenames
-%type <string> inlineContents
-%type <string> inlineCode
-%type <string> inlineComment
-%type <string> maybeInlineCode
-%type <string> inlineImport
-%type <string> inlineImportList
+%type <typeName> typeName
+%type <commaSeparatedTypenames> commaSeparatedTypenames
+%type <inlineContent> inlineContents
+%type <inlineContent> inlineCode
+%type <inlineContent> inlineComment
+%type <inlineContent> maybeInlineCode
+%type <inlineContent> inlineImport
+%type <inlineImportList> inlineImportList
 
 // Reglas de asociatividad y precedencia (de menor a mayor).
 // ((las borré todos))
@@ -107,12 +117,12 @@ start: uml															{ $$ = StartGrammarAction($1); }
 	;
 
 uml: STARTUML umlBody[body] ENDUML uml[nextUml]						{ $$ = UmlGrammarAction($body, $nextUml); }
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = NULL; }
 	;
 
 umlBody: umlBodyContent[bodyContent] ENDLINE umlBody[nextBody]		{ $$ = UmlBodyGrammarAction($bodyContent, $nextBody); }
 	| ENDLINE umlBody[nextBody]										{ $$ = $nextBody; }
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = NULL; }
 	;
 
 umlBodyContent: classDefinition										{ $$ = $1; }
@@ -131,29 +141,29 @@ interfaceDefinition: INTERFACE typeName[name] extends[ext] OPEN_BLOCK maybeEndli
 	;
 
 extends: EXTENDS typeName[type]										{ $$ = ExtendsGrammarAction($type); }
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = NULL; }
 	;
 
 implements: IMPLEMENTS commaSeparatedTypenames[types]				{ $$ = ImplementsGrammarAction($types); } 
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = NULL; }
 	;
 
 classBody: classBodyContent[content] endlines classBody[next]		{ $$ = ClassBodyGrammarAction($content, $next); }
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = NULL; }
 	;
 
 classBodyContent: maybeAccessModifier[acc] classElement[elem]		{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
-	| inlineComment													{ $$ = $1; }
+	| inlineComment[comment]										{ $$ = ClassInlineCommentGrammarAction($comment); }
 	;
 
 classElement: symbolName[name] methodParams[params]	maybeInlineCode[code]
 																	{ $$ = ClassConstructorGrammarAction($name, $params, $code); }
 	| typeName[type] symbolName[name] maybeMethodParams[params]	maybeInlineCode[code]
-																	{ $$ = ClassElementGrammarAction(0, $type, $name, $params, $code); }
+																	{ $$ = ClassElementGrammarAction(EMODS_NONE, $type, $name, $params, $code); }
 	| staticXorFinalModifier[mods] typeName[type] symbolName[name] methodParams[params] inlineCode[code]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params, $code); }
 	| staticXorFinalModifier[mods] typeName[type] symbolName[name] maybeInlineCode[code]
-																	{ $$ = ClassElementGrammarAction($mods, $type, $name, 0, $code); }
+																	{ $$ = ClassElementGrammarAction($mods, $type, $name, NULL, $code); }
 	| staticAndFinalModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params] inlineCode[code]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params, $code); }
 	;
@@ -164,46 +174,46 @@ abstractClassDefinition: ABSTRACT CLASS typeName[name] extends[ext] implements[i
 
 abstractClassBody: abstractClassBodyContent[content] endlines abstractClassBody[next]
 																	{ $$ = ClassBodyGrammarAction($content, $next); }
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = NULL; }
 	;
 
 abstractClassBodyContent: maybeAccessModifier[acc] classElement[elem]
 																	{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
 	| maybeAccessModifier[acc] abstractClassElement[elem]			{ $$ = ClassBodyContentGrammarAction($acc, $elem); }
-	| inlineComment													{ $$ = $1; }
+	| inlineComment[comment]										{ $$ = ClassInlineCommentGrammarAction($comment); }
 	;
 
 abstractClassElement: abstractModifier[mods] typeName[type] symbolName[name] methodParams[params]
-																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params, 0); }
+																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params, NULL); }
 	;
 
 interfaceBody: interfaceBodyContent[content] endlines interfaceBody[next]
 																	{ $$ = InterfaceBodyGrammarAction($content, $next); }
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = NULL; }
 	;
 
 interfaceBodyContent: abstractModifier[mods] typeName[type] symbolName[name] methodParams[params]
-																	{ $$ = InterfaceBodyContentGrammarAction(0, $mods, $type, $name, $params, 0); }
+																	{ $$ = InterfaceBodyContentGrammarAction(EMODS_NONE, $mods, $type, $name, $params, NULL); }
 	| staticModifier[mods] typeName[type] symbolName[name] maybeInlineCode[code]
-																	{ $$ = InterfaceBodyContentGrammarAction(0, $mods, $type, $name, 0, $code); }
+																	{ $$ = InterfaceBodyContentGrammarAction(EMODS_NONE, $mods, $type, $name, NULL, $code); }
 	| staticModifier[mods] typeName[type] symbolName[name] methodParams[params] inlineCode[code]
-																	{ $$ = InterfaceBodyContentGrammarAction(0, $mods, $type, $name, $params, $code); }
+																	{ $$ = InterfaceBodyContentGrammarAction(EMODS_NONE, $mods, $type, $name, $params, $code); }
 	| accessModifier[acc] staticModifier[mods] typeName[type] symbolName[name] maybeInlineCode[code]
-																	{ $$ = InterfaceBodyContentGrammarAction($acc, $mods, $type, $name, 0, $code); }
+																	{ $$ = InterfaceBodyContentGrammarAction($acc, $mods, $type, $name, NULL, $code); }
 	| accessModifier[acc] staticModifier[mods] typeName[type] symbolName[name] methodParams[params] inlineCode[code]
 																	{ $$ = InterfaceBodyContentGrammarAction($acc, $mods, $type, $name, $params, $code); }
 	| staticAndFinalModifiers[mods] typeName[type] symbolName[name] inlineCode[code]
-																	{ $$ = InterfaceBodyContentGrammarAction(0, $mods, $type, $name, 0, $code); }
+																	{ $$ = InterfaceBodyContentGrammarAction(EMODS_NONE, $mods, $type, $name, NULL, $code); }
 	| accessModifier[acc] staticAndFinalModifiers[mods] typeName[type] symbolName[name] inlineCode[code]
-																	{ $$ = InterfaceBodyContentGrammarAction($acc, $mods, $type, $name, 0, $code); }
+																	{ $$ = InterfaceBodyContentGrammarAction($acc, $mods, $type, $name, NULL, $code); }
 	| typeName[type] symbolName[name] methodParams[params] maybeInlineCode[code]
-																	{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, $params, $code); }
-	| typeName[type] symbolName[name] inlineCode[code]				{ $$ = InterfaceBodyContentGrammarAction(0, 0, $type, $name, 0, $code); }
-	| inlineComment													{ $$ = $1; }
+																	{ $$ = InterfaceBodyContentGrammarAction(EMODS_NONE, AMODS_NONE, $type, $name, $params, $code); }
+	| typeName[type] symbolName[name] inlineCode[code]				{ $$ = InterfaceBodyContentGrammarAction(EMODS_NONE, AMODS_NONE, $type, $name, NULL, $code); }
+	| inlineComment[comment]										{ $$ = ClassInlineCommentGrammarAction($comment); }
 	;
 
 maybeMethodParams: methodParams										{ $$ = $1; }
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = NULL; }
 	;
 
 methodParams: OPEN_PARENTHESIS parameterList[paramList] CLOSE_PARENTHESIS
@@ -212,7 +222,7 @@ methodParams: OPEN_PARENTHESIS parameterList[paramList] CLOSE_PARENTHESIS
 
 parameterList: typeName[type] symbolName[name]						{ $$ = ParameterGrammarAction($type, $name); }
 	| typeName[type] symbolName[name] COMMA parameterList[next]		{ $$ = ParameterListGrammarAction($type, $name, $next); }
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = NULL; }
 	;
 
 abstractModifier: OPEN_BLOCK ABSTRACT CLOSE_BLOCK					{ $$ = AbstractGrammarAction(); }
@@ -238,7 +248,7 @@ accessModifier: DEFAULT 											{ $$ = DefaultGrammarAction(); }
 	;
 
 maybeAccessModifier: accessModifier									{ $$ = $1; }
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = AMODS_NONE; }
 	;
 
 symbolName: SYMBOLNAME[symbol]										{ $$ = SymbolnameGrammarAction($symbol); }
@@ -271,7 +281,7 @@ inlineComment: INLINE_COMMENT inlineContents[commentContents]		{ $$ = InlineComm
 	;
 
 maybeInlineCode: inlineCode											{ $$ = $1; }
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = NULL; }
 	;
 
 inlineImport: INLINE_IMPORT inlineContents[importContents]			{ $$ = InlineImportGrammarAction($importContents); }
@@ -280,7 +290,7 @@ inlineImport: INLINE_IMPORT inlineContents[importContents]			{ $$ = InlineImport
 
 inlineImportList: inlineImport[import] endlines inlineImportList[next]
 																	{ $$ = InlineImportListGrammarAction($import, $next); }
-	| /* lambda */													{ $$ = 0; }
+	| /* lambda */													{ $$ = NULL; }
 	;
 
 %%
