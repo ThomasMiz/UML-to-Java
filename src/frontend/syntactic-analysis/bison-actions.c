@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../../utils/buffer.h"
 
 /**
  * Implementación de "bison-grammar.h".
@@ -23,6 +24,77 @@ void yyerror(const char* string) {
     LogErrorRaw("\n\n");
 }
 
+void writeGenerics(bufferADT buffer, TCommaSeparatedTypenames * generics) {
+    if (generics == NULL)
+        return;
+
+    write_buffer(buffer, "<");
+    while(generics != NULL) {
+        writeTTypeName(buffer, generics->typeName);
+        generics = generics->next;
+        if (generics != NULL)
+            write_buffer(buffer, ", ");
+    }
+    write_buffer(buffer, ">");
+}
+
+void writeTTypeName(bufferADT buffer, TTypeName* name) {
+    if (name == NULL)
+        return;
+
+    write_buffer(buffer, name->symbolName);
+    writeGenerics(buffer, name->genericType);
+}
+
+void generateClassFile(TClassType type,
+                       const TTypeName* name,
+                       const TTypeName* extends,
+                       const TCommaSeparatedTypenames* implements,
+                       const TInlineImportList* imports,
+                       const TClassBody* body) {
+    LogDebug("\tgenerateClassFile(%lu)", name);
+    bufferADT buffer = init_buffer(name->symbolName);
+    
+    switch(type) {
+        case CTYPE_CLASS:
+        write_buffer(buffer, "class ");
+        break;
+        case CTYPE_ABSTRACTCLASS:
+        write_buffer(buffer, "abstract class ");
+        break;
+        case CTYPE_INTERFACE:
+        write_buffer(buffer, "interface ");
+        break;
+    }
+
+    writeTTypeName(buffer, name);
+
+    generate_file(buffer);
+    
+}
+
+void generateClassFiles(const TUmlBody* body) {
+    LogDebug("\tgenerateClassFiles(%lu)", body);
+    while (body != NULL) {
+        TClassDefinition* class = body->bodyContent;
+        generateClassFile(class->type,
+                          class->name,
+                          class->extends,
+                          class->implements,
+                          class->imports,
+                          class->body);
+        body = body->next;
+    }
+}
+
+void generateUmlFiles(const TUml* uml) {
+    LogDebug("\tgenerateUmlFiles(%lu)", uml);
+    while (uml != NULL) {
+        generateClassFiles(uml->body);
+        uml = uml->next;
+    }
+}
+
 /**
  * Esta acción se corresponde con el no-terminal que representa el símbolo
  * inicial de la gramática, y por ende, es el último en ser ejecutado, lo que
@@ -31,6 +103,9 @@ void yyerror(const char* string) {
  */
 int StartGrammarAction(const TUml* uml) {
     LogDebug("\tStartGrammarAction(%lu)", uml);
+
+    generateUmlFiles(uml);
+
     /*
      * "state" es una variable global que almacena el estado del compilador,
      * cuyo campo "succeed" indica si la compilación fue o no exitosa, la cual
@@ -130,7 +205,7 @@ TClassElement* ClassConstructorGrammarAction(const char* name, const TMethodPara
     LogDebug("\tClassConstructorGrammarAction(%d, %d, %d)", name, params, inlineCode);
     TClassElement* node = malloc(sizeof(TClassElement));
     node->accessModifiers = AMODS_NONE;
-    node->elementModifiers = AMODS_NONE;
+    node->elementModifiers = EMODS_NONE;
     node->typeName = NULL;
     node->symbolName = name;
     node->parameterList = params;
