@@ -58,8 +58,6 @@ void writeTCommaSeparatedTypenames(bufferADT buffer, TCommaSeparatedTypenames* n
     }
 }
 
-// TODO investigar code beautifiers para los archivos java finales https://github.com/uncrustify/uncrustify
-
 void writeTInlineContent(bufferADT buffer, TInlineContent* content) {
     LogDebug("\twriteTInlineContent(%lu)", content);
     while (content != NULL) {
@@ -86,6 +84,7 @@ void writeTInlineImportList(bufferADT buffer, TInlineImportList* imports) {
 // AMODS_PUBLIC = 1 << 3
 
 void writeTAccessModifiers(bufferADT buffer, TAccessModifiers accessModifiers) {
+    LogDebug("\twriteTAccessModifiers(%lu, %lu)", buffer,accessModifiers);
     if (accessModifiers & AMODS_NONE || accessModifiers & AMODS_DEFAULT) {
         return;
     }
@@ -108,33 +107,11 @@ void writeTAccessModifiers(bufferADT buffer, TAccessModifiers accessModifiers) {
         accessModifiers &= ~AMODS_PUBLIC;
     }
 
-    // while (accessModifiers) {
-    //     if (added)
-    //         write_buffer(buffer, " ");
-
-    //     if (accessModifiers & AMODS_PRIVATE) {
-    //         write_buffer(buffer, "private");
-    //         accessModifiers &= ~AMODS_PRIVATE;
-    //     }
-
-    //     else if (accessModifiers & AMODS_PROTECTED) {
-    //         write_buffer(buffer, "protected");
-    //         accessModifiers &= ~AMODS_PROTECTED;
-    //     }
-
-    //     else if (accessModifiers & AMODS_PUBLIC) {
-    //         write_buffer(buffer, "public");
-    //         accessModifiers &= ~AMODS_PUBLIC;
-    //     }
-    // }
 }
 
-// EMODS_NONE = 0,
-// EMODS_STATIC = 1 << 0,
-// EMODS_ABSTRACT = 1 << 1,
-// EMODS_FINAL = 1 << 2
-
 void writeTElementModifiers(bufferADT buffer, TElementModifiers elementModifiers, TClassType type) {
+    int a  = elementModifiers;
+    LogDebug("\twriteTElementModifiers(%lu, %d)", buffer,a);
     if (elementModifiers & EMODS_NONE) {
         return;
     }
@@ -142,6 +119,7 @@ void writeTElementModifiers(bufferADT buffer, TElementModifiers elementModifiers
     TElementModifiers added = 0;
 
     while (elementModifiers) {
+        // LogDebug("%d", elementModifiers);
         if (added)
             write_buffer(buffer, " ");
 
@@ -168,6 +146,7 @@ void writeTElementModifiers(bufferADT buffer, TElementModifiers elementModifiers
 }
 
 void writeTParameterList(bufferADT buffer, TParameterList* paramList) {
+    LogDebug("\twriteTParameterList(%lu, %lu)", buffer,paramList);
     while (paramList != NULL) {
         writeTTypeName(buffer, paramList->typeName);
         write_buffer(buffer, " ");
@@ -179,6 +158,7 @@ void writeTParameterList(bufferADT buffer, TParameterList* paramList) {
 }
 
 void writeTClassElement(bufferADT buffer, TClassElement* element, TClassType type) {
+    LogDebug("\twriteTClassElement(%lu, %lu)", buffer, element);
     TMethodParameterList* methodParamList = element->parameterList;
     if (type = CTYPE_INTERFACE && methodParamList != NULL) {
         write_buffer(buffer, "default ");
@@ -204,7 +184,7 @@ void writeTClassElement(bufferADT buffer, TClassElement* element, TClassType typ
             writeTInlineContent(buffer, element->inlineCode);
             write_buffer(buffer, "}\n");
         } else {
-            write_buffer(buffer, ";\n");
+            write_buffer(buffer, "\n");
         }
         return;
     }
@@ -217,6 +197,7 @@ void writeTClassElement(bufferADT buffer, TClassElement* element, TClassType typ
 }
 
 void writeTClassBody(bufferADT buffer, TClassBody* body, TClassType type) {
+    LogDebug("\twriteTClassBody(%lu, %lu)", buffer, body);
     while (body != NULL) {
         if (body->comment != NULL) {
             write_buffer(buffer, "/*");
@@ -411,7 +392,7 @@ TClassElement* ClassConstructorGrammarAction(const char* name, const TMethodPara
 }
 
 TClassElement* ClassElementGrammarAction(const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode) {
-    LogDebug("\tClassElementGrammarAction(%d, %lu, %lu, %lu, %lu)", elementMods, type, name, params, inlineCode);
+    LogDebug("\tClassElementGrammarAction(%u, %lu, %lu, %lu, %lu)", elementMods, type, name, params, inlineCode);
     TClassElement* node = malloc(sizeof(TClassElement));
     node->accessModifiers = AMODS_NONE;
     node->elementModifiers = elementMods;
@@ -433,6 +414,7 @@ TClassBody* InterfaceBodyContentGrammarAction(const TAccessModifiers accessMods,
     TClassElement* node = malloc(sizeof(TClassElement));
     node->accessModifiers = accessMods;
     node->elementModifiers = elementMods;
+    printf("hola %d", elementMods);
     node->typeName = type;
     node->symbolName = name;
     node->parameterList = params;
@@ -506,7 +488,7 @@ TElementModifiers StaticGrammarAction() {
 }
 
 TElementModifiers FinalGrammarAction() {
-    LogDebug("\tFinalGrammarAction()");
+    LogDebug("\tFinalGrammarAction(%d)", EMODS_FINAL);
     return EMODS_FINAL;
 }
 

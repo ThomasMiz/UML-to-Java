@@ -34,7 +34,7 @@ typedef enum {
     EMODS_NONE = 0,
     EMODS_STATIC = 1 << 0,
     EMODS_ABSTRACT = 1 << 1,
-    EMODS_FINAL = 1 << 2
+    EMODS_FINAL = 1 << 3
 } TElementModifiers;
 
 typedef enum {

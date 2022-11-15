@@ -1,6 +1,7 @@
 %{
 
 #include "bison-actions.h"
+#include "../../backend/support/logger.h"
 
 %}
 
@@ -232,11 +233,11 @@ staticModifier: OPEN_BLOCK STATIC CLOSE_BLOCK						{ $$ = StaticGrammarAction();
 	;
 
 staticXorFinalModifier: staticModifier								{ $$ = $1; }
-	| FINAL															{ $$ = FinalGrammarAction(); }
+	| FINAL															{ $$ = EMODS_FINAL;}
 	;
 
-staticAndFinalModifiers: staticModifier FINAL						{ $$ = $1 + FinalGrammarAction(); }
-	| FINAL staticModifier											{ $$ = FinalGrammarAction() + $1; }
+staticAndFinalModifiers: staticModifier FINAL						{ $$ = EMODS_FINAL | EMODS_STATIC; }
+	| FINAL staticModifier											{ $$ = EMODS_FINAL | EMODS_STATIC; }
 	;
 
 /* -V-------------------------------------- General --------------------------------------V- */

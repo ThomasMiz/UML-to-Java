@@ -3,8 +3,8 @@
 
 
 class Papafrita {
-    'import: import
-    'import: hhhhhhh'/
+    'import: Import.buenas
+    'import: Hhhhhhh.hola
 
 
     # {static} final int constante /'code: 50; '/

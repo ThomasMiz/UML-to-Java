@@ -19,9 +19,11 @@
 %x MULTILINE_COMMENT
 %x SINGLELINE_INLINE
 %x MULTILINE_INLINE
+%x SINGLELINE_IMPORT_INLINE
 
 /* Patrones reutilizables. */
 symbolName      [a-zA-Z][a-zA-Z0-9_]*
+letterOrPeriod [A-Z][A-Za-z.]*\.[A-Za-z.]+
 endline         [\n]
 whitespace      [ \f\n\r\t\v]
 maybeWhitespace [ \f\n\r\t\v]*
@@ -66,7 +68,7 @@ multilineInlineContent ([^\']|[\|\°\¬\!\"\#\$\%\&\/\(\)\=\?\¡\\\¿\+\*\~\[\]\
 
 <UML>"'"{maybeWhitespaceNoNewline}"code:"   { token t = StartInlineCodePatternAction(); BEGIN(SINGLELINE_INLINE); return t; }
 <UML>"'"{maybeWhitespaceNoNewline}"comment:" { token t = StartInlineCommentPatternAction(); BEGIN(SINGLELINE_INLINE); return t; }
-<UML>"'"{maybeWhitespaceNoNewline}"import:" { token t = StartInlineImportPatternAction(); BEGIN(SINGLELINE_INLINE); return t; }
+<UML>"'"{maybeWhitespaceNoNewline}"import:" { token t = StartInlineImportPatternAction(); BEGIN(SINGLELINE_IMPORT_INLINE); return t; }
 <UML>"/'"{maybeWhitespace}"code:"           { token t = StartInlineCodePatternAction(); BEGIN(MULTILINE_INLINE); return t; }
 <UML>"/'"{maybeWhitespace}"comment:"        { token t = StartInlineCommentPatternAction(); BEGIN(MULTILINE_INLINE); return t; }
 <UML>"/'"                                   { StartMultilineCommentPatternAction(); BEGIN(MULTILINE_COMMENT); }
@@ -86,5 +88,8 @@ multilineInlineContent ([^\']|[\|\°\¬\!\"\#\$\%\&\/\(\)\=\?\¡\\\¿\+\*\~\[\]\
 <SINGLELINE_INLINE>{endline}                { token t = EndSinglelineInlinePatternAction(); BEGIN(UML); return t; }
 <SINGLELINE_INLINE>{singlelineInlineContent} { return InlineContentPatternAction(yytext, yyleng); }
 <SINGLELINE_INLINE>.                        { return InlineContentPatternAction(yytext, yyleng); }
+
+<SINGLELINE_IMPORT_INLINE>{endline}                { token t = EndSinglelineInlinePatternAction(); BEGIN(UML); return t; }
+<SINGLELINE_IMPORT_INLINE>{maybeWhitespaceNoNewline}{letterOrPeriod}    { return InlineContentPatternAction(yytext, yyleng); }
 
 %% 
