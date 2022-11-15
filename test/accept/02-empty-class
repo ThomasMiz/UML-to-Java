@@ -1,7 +1,8 @@
 @startuml
 
 class hola {
-    
+    'comment: hola
+    int getCalidadDelHelado() 'code: return 0;
 }
 
 @enduml

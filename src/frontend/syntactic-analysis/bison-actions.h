@@ -11,8 +11,8 @@
  * abstracta (i.e., el AST).
  */
 
-int StartGrammarAction(const TUml* uml);
-const TUml* UmlGrammarAction(const TUmlBody* body, const TUml* next);
+int StartGrammarAction(TUml* uml);
+TUml* UmlGrammarAction(const TUmlBody* body, const TUml* next);
 const TUmlBody* UmlBodyGrammarAction(const TClassDefinition* classDefinition, const TUmlBody* next);
 
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */

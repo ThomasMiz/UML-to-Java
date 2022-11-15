@@ -1,6 +1,7 @@
 @startuml
 
-class QuieroMasFeriados<PorFavor<Plis>> {
+class QuieroMasFeriados<PorFavor<Plis>> extends Hola implements List, Juan {
+    'import: import
     A<A<A, A, A<A<A<A, A<A>, A>>>>, A<A, A<A<A, A, A>, A, A>>> uff
     A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A<A>, A<A>>>>>>>>>>>>>>>>>>>>>, A, A, A, A<A, A<A<A<A>>>>> que
 }
