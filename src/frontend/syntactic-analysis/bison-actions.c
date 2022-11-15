@@ -58,6 +58,8 @@ void writeTCommaSeparatedTypenames(bufferADT buffer, TCommaSeparatedTypenames* n
     }
 }
 
+// TODO investigar code beautifiers para los archivos java finales https://github.com/uncrustify/uncrustify
+
 void writeTInlineContent(bufferADT buffer, TInlineContent* content) {
     LogDebug("\twriteTInlineContent(%lu)", content);
     while (content != NULL) {
