@@ -77,4 +77,4 @@ user@machine:path/ $ script\test.bat
 ```
 
 ## Uso de librerías de terceros
-Se utiliza una herramienta llamada [Google Java Format](https://github.com/google/google-java-format) que se utiliza para formatear el código compilado a una versión mas legible y mejor identada. Con el fin de poder ejecutar correctamente la misma, es necesaria una instalación de JDK 11 o posterior.
+Se utiliza una herramienta llamada [Google Java Format](https://github.com/google/google-java-format) que se usa para formatear el código compilado de Java a una versión más legible y mejor identada. Con el fin de poder ejecutar correctamente la misma, es necesaria una instalación de JDK 11 o posterior.
