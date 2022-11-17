@@ -42,7 +42,6 @@ void write_buffer(bufferADT buffer, char * s) {
 }
 
 void generate_file(bufferADT buffer) {
-    // printf("%s: ", buffer->filename);
     system("mkdir output 2> /dev/null");
     strcpy(tmp_buf, "rm output/");
     strcat(tmp_buf, buffer->filename);

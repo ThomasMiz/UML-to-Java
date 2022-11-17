@@ -5,6 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../utils/buffer.h"
+#include "../../utils/symbol_table.h"
+
+
+static void clean_resources_and_exit() {
+    LogInfo("\texiting");
+    exit(-1);
+}
 
 /**
  * Implementación de "bison-grammar.h".
@@ -70,6 +77,9 @@ void writeTInlineContent(bufferADT buffer, TInlineContent* content) {
 void writeTInlineImportList(bufferADT buffer, TInlineImportList* imports) {
     LogDebug("\twriteTInlineImportList(%lu)", imports);
     while (imports != NULL) {
+        if (add_entry(imports->import->content, TYPE_IMPORT)) {
+            clean_resources_and_exit();
+        }
         write_buffer(buffer, "import ");
         writeTInlineContent(buffer, imports->import);
         write_buffer(buffer, ";\n");
@@ -165,16 +175,18 @@ void writeTClassElement(bufferADT buffer, TClassElement* element, TClassType typ
     }
     if (element->accessModifiers != NULL) {
         writeTAccessModifiers(buffer, element->accessModifiers);
-    write_buffer(buffer, " ");
+        write_buffer(buffer, " ");
     }
- 
+    if(add_entry(element->symbolName, TYPE_CLASS_ELEM)) {
+        clean_resources_and_exit();
+    }
     
     writeTElementModifiers(buffer, element->elementModifiers, type);
     write_buffer(buffer, " ");
     writeTTypeName(buffer, element->typeName);
     write_buffer(buffer, " ");
     write_buffer(buffer, element->symbolName);
-    
+
     if (methodParamList != NULL) {
         write_buffer(buffer, "(");
         writeTParameterList(buffer, methodParamList->parameterList);
@@ -184,7 +196,7 @@ void writeTClassElement(bufferADT buffer, TClassElement* element, TClassType typ
             writeTInlineContent(buffer, element->inlineCode);
             write_buffer(buffer, "}\n");
         } else {
-            write_buffer(buffer, "\n");
+            write_buffer(buffer, ";\n");
         }
         return;
     }
@@ -192,6 +204,8 @@ void writeTClassElement(bufferADT buffer, TClassElement* element, TClassType typ
     if (inlineContent != NULL) {
         write_buffer(buffer, " = ");
         writeTInlineContent(buffer, element->inlineCode);
+        write_buffer(buffer, "\n");
+        return;
     }
     write_buffer(buffer, ";\n");
 }
@@ -206,7 +220,7 @@ void writeTClassBody(bufferADT buffer, TClassBody* body, TClassType type) {
         } else if (body->element != NULL) {
             writeTClassElement(buffer, body->element, type);
         } else {
-            abort();
+            clean_resources_and_exit();
         }
         body = body->next;
     }
@@ -218,11 +232,12 @@ void generateClassFile(TClassType type,
                        TCommaSeparatedTypenames* implements,
                        TInlineImportList* imports,
                        TClassBody* body) {
+    new_scope();
     LogDebug("\tgenerateClassFile(%lu)", name);
     bufferADT buffer = init_buffer(name->symbolName);
 
     writeTInlineImportList(buffer, imports);
-
+    
     switch (type) {
         case CTYPE_CLASS:
             write_buffer(buffer, "class ");
@@ -248,18 +263,27 @@ void generateClassFile(TClassType type,
     writeTClassBody(buffer, body, type);
     write_buffer(buffer, "}\n");
     generate_file(buffer);
+    end_scope();
+    destroy_buffer(buffer);
 }
+
+
 
 void generateClassFiles(TUmlBody* body) {
     LogDebug("\tgenerateClassFiles(%lu)", body);
     while (body != NULL) {
         TClassDefinition* class = body->bodyContent;
+        if (add_entry(class->name->symbolName, TYPE_CLASS)) {
+            LogError("\t%s name is already used", class->name->symbolName);
+            clean_resources_and_exit();
+        }
         generateClassFile(class->type,
                           class->name,
                           class->extends,
                           class->implements,
                           class->imports,
                           class->body);
+
         body = body->next;
     }
 }
@@ -280,9 +304,9 @@ void generateUmlFiles(TUml* uml) {
  */
 int StartGrammarAction(TUml* uml) {
     LogDebug("\tStartGrammarAction(%lu)", uml);
-
+    init_symbol_table();
     generateUmlFiles(uml);
-
+    destroy_symbol_table();
     /*
      * "state" es una variable global que almacena el estado del compilador,
      * cuyo campo "succeed" indica si la compilación fue o no exitosa, la cual

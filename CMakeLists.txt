@@ -80,6 +80,7 @@ add_executable(Compiler
 	src/frontend/syntactic-analysis/bison-actions.c
 	src/frontend/syntactic-analysis/bison-parser.c
 	src/utils/buffer.c
+	src/utils/symbol_table.c
 	# Agregar otros archivos *.c (si no se incluyen, no se compilan).
 	# ...
 )
