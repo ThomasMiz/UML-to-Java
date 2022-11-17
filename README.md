@@ -59,6 +59,8 @@ user@machine:path/ $ script\start.bat program
 
 Al correr el programa se debería obtener un mensaje diciendo que la compilación fue exitosa. Con el flag de debugging activado que se puede habilitar en `logger.h` se deberían observar en la consola los diferentes tokens del lenguaje que son parseados por Flex en el archivo.
 
+Se creará un directorio en la raíz denominado `output` donde se generarán los archivos `.java` correspondientes al uml del archivo `program`. En cada ejecución del compilador se sobreescriben los archivos que se encuentran en el directorio en caso de que ya existan.
+
 ## Testing
 
 En Linux:
