@@ -1,6 +1,6 @@
 #ifndef _SYMBOL_TABLE_H_
 #define _SYMBOL_TABLE_H_
-
+#include "../backend/semantic-analysis/abstract-syntax-tree.h"
 typedef enum {
     TYPE_IMPORT = 0,
     TYPE_CLASS,
@@ -11,6 +11,7 @@ typedef enum {
 void init_symbol_table();
 int add_entry(char * name, TSymbolType type);
 void destroy_symbol_table();
-void new_scope();
-void end_scope();
+void new_class();
+void end_class();
+int add_entry_method(char * name, TMethodParameterList* param_list);
 #endif

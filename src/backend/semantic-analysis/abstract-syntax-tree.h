@@ -4,25 +4,25 @@
 /* -V-------------------------------------- Inlines --------------------------------------V- */
 
 typedef struct TInlineContent {
-    const char* content;
-    const struct TInlineContent* next;
+    char* content;
+    struct TInlineContent* next;
 } TInlineContent;
 
 typedef struct TInlineImportList {
-    const TInlineContent* import;
-    const struct TInlineImportList* next;
+    TInlineContent* import;
+    struct TInlineImportList* next;
 } TInlineImportList;
 
 /* -V-------------------------------------- General --------------------------------------V- */
 
 struct TCommaSeparatedTypenames {
-    const struct TTypeName* typeName;
-    const struct TCommaSeparatedTypenames* next;
+    struct TTypeName* typeName;
+    struct TCommaSeparatedTypenames* next;
 };
 
 struct TTypeName {
-    const char* symbolName;
-    const struct TCommaSeparatedTypenames* genericType;
+    char* symbolName;
+    struct TCommaSeparatedTypenames* genericType;
 };
 
 typedef struct TCommaSeparatedTypenames TCommaSeparatedTypenames;
@@ -46,13 +46,13 @@ typedef enum {
 } TAccessModifiers;
 
 typedef struct TParameterList {
-    const TTypeName* typeName;
-    const char* symbolName;
-    const struct TParameterList* next;
+    TTypeName* typeName;
+    char* symbolName;
+    struct TParameterList* next;
 } TParameterList;
 
 typedef struct TMethodParameterList {
-    const TParameterList* parameterList;
+    TParameterList* parameterList;
 } TMethodParameterList;
 
 /* -V-------------------------------------- Classes (& Interfaces) --------------------------------------V- */
@@ -60,16 +60,16 @@ typedef struct TMethodParameterList {
 typedef struct TClassElement {
     TAccessModifiers accessModifiers;
     TElementModifiers elementModifiers;
-    const TTypeName* typeName;
-    const char* symbolName;
-    const TMethodParameterList* parameterList;
-    const TInlineContent* inlineCode;
+     TTypeName* typeName;
+     char* symbolName;
+     TMethodParameterList* parameterList;
+     TInlineContent* inlineCode;
 } TClassElement;
 
 typedef struct TClassBody {
-    const TClassElement* element;
-    const TInlineContent* comment;
-    const struct TClassBody* next;
+    TClassElement* element;
+     TInlineContent* comment;
+     struct TClassBody* next;
 } TClassBody;
 
 typedef enum {
@@ -80,23 +80,23 @@ typedef enum {
 
 typedef struct TClassDefinition {
     TClassType type;
-    const TTypeName* name;
-    const TTypeName* extends;
-    const TCommaSeparatedTypenames* implements;
-    const TInlineImportList* imports;
-    const TClassBody* body;
+     TTypeName* name;
+     TTypeName* extends;
+     TCommaSeparatedTypenames* implements;
+     TInlineImportList* imports;
+     TClassBody* body;
 } TClassDefinition;
 
 /* -V-------------------------------------- UML --------------------------------------V- */
 
 typedef struct TUmlBody {
-    const TClassDefinition* bodyContent;
-    const struct TUmlBody* next;
+     TClassDefinition* bodyContent;
+     struct TUmlBody* next;
 } TUmlBody;
 
 typedef struct TUml {
-    const TUmlBody* body;
-    const struct TUml* next;
+     TUmlBody* body;
+     struct TUml* next;
 } TUml;
 
 #endif

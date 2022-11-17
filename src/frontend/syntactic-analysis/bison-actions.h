@@ -3,7 +3,7 @@
 
 #include "../../backend/support/shared.h"
 #include "../../backend/semantic-analysis/abstract-syntax-tree.h"
-
+#include "../../utils/buffer.h"
 /**
  * Se definen las acciones a ejecutar sobre cada regla de producción de la
  * gramática. El objetivo de cada acción debe ser el de construir el nodo
@@ -11,7 +11,7 @@
  * abstracta (i.e., el AST).
  */
 
-int StartGrammarAction(TUml* uml);
+int StartGrammarAction(const TUml* uml);
 TUml* UmlGrammarAction(const TUmlBody* body, const TUml* next);
 const TUmlBody* UmlBodyGrammarAction(const TClassDefinition* classDefinition, const TUmlBody* next);
 
@@ -27,7 +27,7 @@ TClassBody* ClassInlineCommentGrammarAction(const TInlineContent* content);
 TClassElement* ClassConstructorGrammarAction(const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode);
 TClassElement* ClassElementGrammarAction(const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode);
 const TClassBody* InterfaceBodyGrammarAction(TClassBody* body, const TClassBody* next);
-TClassBody* InterfaceBodyContentGrammarAction(const TAccessModifiers accessMods, const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode);
+const TClassBody* InterfaceBodyContentGrammarAction(const TAccessModifiers accessMods, const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode);
 
 /* -V-------------------------------------- Methods --------------------------------------V- */
 
@@ -60,5 +60,7 @@ const TInlineContent* InlineCodeGrammarAction(const TInlineContent* content);
 const TInlineContent* InlineCommentGrammarAction(const TInlineContent* content);
 const TInlineContent* InlineImportGrammarAction(const TInlineContent* content);
 const TInlineImportList* InlineImportListGrammarAction(const TInlineContent* content, const TInlineImportList* next);
+
+void writeTTypeName(const bufferADT buffer, const TTypeName* name);
 
 #endif

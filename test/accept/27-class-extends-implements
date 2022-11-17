@@ -4,7 +4,7 @@ class PokemonClass {
     - final float damageMultiplier 'code: 1;
     - final String name
     'comment: El damageMultiplier permite que una clase de pokemon lastime más :)
-
+    + String getName() 'code: return name;
     # PokemonClass(String name, float damageMultiplier) /'
         code:
         this.name = name == null ? "Unknown" : name;
@@ -12,14 +12,15 @@ class PokemonClass {
     '/ 'Cierro un comentario multilinea y abro uno de una linea!
 
     + float getDamageMultiplier() 'code: return damageMultiplier;
-    + String getName() 'code: return name;
 
     'comment: Pedro '/''7/7'77///'77//'7///?7//?/?7?/?/?7/?77/77///?7/?//?/?7'7'7'7/?
 }
 
 class PokemonFireClass extends PokemonClass {
     + PokemonFireClass() 'code: super(1.2f);
+    + PokemonFireClass(int hola) 'code: super(1.2f);
     '      comment:      Pedro
+    + String getName() 'code: return name;
 
 }
 
@@ -27,6 +28,7 @@ abstract class Pokemon<T> { }
 
 interface Truchamon<T, V> extends Truchada<T> {
     'comment: Alfajor grandote, doble triple sabor!
+    + {static} final int damageMultiplier 'code: 1;
 }
 
 class Charizard extends Pokemon<PokemonFireClass> implements Iterable<Integer>, Truchamon<Faier, Integer>, String {

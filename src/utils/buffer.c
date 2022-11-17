@@ -3,7 +3,7 @@
 #include "buffer.h"
 #include <string.h>
 
-#define DIM 200
+#define DIM 500
 
 #define SIZE 200
 
@@ -18,11 +18,14 @@ typedef struct bufferCDT {
 static char tmp_buf[200];
 
 bufferADT init_buffer(char * filename) {
+    if (filename == NULL)
+        filename = "<EMPTY>";
     bufferCDT * buffer = malloc(sizeof(bufferCDT));
     buffer->buffer = malloc(DIM);
     buffer->size = DIM;
     int len = strlen(filename);
     char * ext = ".java";
+    buffer->ptr = 0;
     buffer->filename = malloc(len +strlen(ext) +1);
     strcpy(buffer->filename, filename);
     strcat(buffer->filename, ext);
@@ -31,14 +34,18 @@ bufferADT init_buffer(char * filename) {
 
 void write_buffer(bufferADT buffer, char * s) {
     int len = strlen(s);
-    if (buffer->size + len) {
-        int added = len > DIM ? 2*len : DIM;
+    if ((buffer->size - buffer->ptr) <= len ) {
+        int added = len >= DIM ? 2*len : DIM;
         buffer->size+=added;
         buffer->buffer = realloc(buffer->buffer, buffer->size);
     }
 
     strcpy(buffer->buffer + buffer->ptr, s);
     buffer->ptr += len;
+}
+
+char * get_current_string_buffer(bufferADT buffer) {
+    return buffer->buffer;
 }
 
 void generate_file(bufferADT buffer) {
@@ -50,9 +57,9 @@ void generate_file(bufferADT buffer) {
     strcpy(tmp_buf, "rm ./");
     strcat(tmp_buf, buffer->filename);
     strcat(tmp_buf, " 2> /dev/null");
-    tmp_buf[0] = '.';
-    tmp_buf[1] = '/';
-    strcpy(tmp_buf + 2, buffer->filename);
+    system(tmp_buf);
+    strcpy(tmp_buf, "./");
+    strcat(tmp_buf, buffer->filename);
     FILE *fp = fopen(tmp_buf, "ab");
     if (fp != NULL)
     {
