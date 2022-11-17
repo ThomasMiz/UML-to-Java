@@ -11,7 +11,7 @@ Para construir el compilador, se requieren las siguientes dependencias:
 * [Flex v2.6.4](https://github.com/westes/flex)
 * [GCC v11.1.0](https://gcc.gnu.org/)
 * [Make v4.3](https://www.gnu.org/software/make/)
-* JDK 11
+* JDK 11 o posterior
 
 Si en lugar de trabajar con un entorno _Linux_, se está construyendo el proyecto sobre un entorno _Microsoft Windows_, se debe instalar _Microsoft Visual Studio 2022_ con las extensiones para desarrollar aplicaciones en _C/C++_, así como también las herramientas requeridas, con excepción del compilador _GCC_ y la herramienta _Make_.
 
