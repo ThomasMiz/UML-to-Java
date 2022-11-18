@@ -182,15 +182,14 @@ void writeTClassElement(const bufferADT buffer, const TClassElement* element, co
     LogDebug("\twriteTClassElement(%lu, %lu)", buffer, element);
     TMethodParameterList* methodParamList = element->parameterList;
     TClassType auxType = type;
-    if (auxType == CTYPE_INTERFACE && methodParamList != NULL && element->inlineCode != NULL) {
+    if (auxType == CTYPE_INTERFACE && !(element->elementModifiers & EMODS_ABSTRACT)) {
         write_buffer(buffer, "default ");
 
-        if (element->elementModifiers & EMODS_STATIC) {
+        if (element->elementModifiers & EMODS_STATIC && element->parameterList != NULL) {
             LogError("An interface cannot be static and have a default implementation");
             clean_resources_and_exit();
         }
     }
-
 
     if (element->accessModifiers != AMODS_NONE) {
         writeTAccessModifiers(buffer, element->accessModifiers);
@@ -258,13 +257,20 @@ void writeTClassBody(const bufferADT buffer, const TClassBody* body, const TClas
     }
 }
 
+// void checkValidImplements(const TCommaSeparatedTypenames* implements) {
+//     TCommaSeparatedTypenames * auxImplements = (TCommaSeparatedTypenames*) implements;
+//     while (auxImplements != NULL) {
+//         if (!is_valid_implements_class(implements->))
+//     }
+// }
+
 void generateClassFile(const TClassType type,
                        const TTypeName* name,
                        const TTypeName* extends,
                        const TCommaSeparatedTypenames* implements,
                        const TInlineImportList* imports,
                        const TClassBody* body) {
-    
+
     LogDebug("\tgenerateClassFile(%lu)", name);
     bufferADT buffer = init_buffer(name->symbolName);
 
@@ -285,10 +291,18 @@ void generateClassFile(const TClassType type,
     writeTTypeName(buffer, name);
     if (extends != NULL) {
         write_buffer(buffer, " extends ");
+        if (!is_valid_extends(extends, type)) {
+            LogError("Not a valid entity to extend");
+            clean_resources_and_exit();
+        }
         writeTTypeName(buffer, extends);
     }
     if (implements != NULL) {
         write_buffer(buffer, " implements ");
+        if (!is_valid_implements(implements)) {
+            LogError("Not a valid entity to implement");
+            clean_resources_and_exit();
+        }
         writeTCommaSeparatedTypenames(buffer, implements);
     }
     write_buffer(buffer, " {\n");
@@ -303,7 +317,9 @@ void generateClassFiles(const TUmlBody* body) {
     while (body != NULL) {
         new_class();
         TClassDefinition* class = body->bodyContent;
-        if (add_entry(class->name->symbolName, TYPE_CLASS)) {
+        TSymbolType type = TYPE_CLASS | (class->type == CTYPE_INTERFACE ? TYPE_INTERFACE : 0);
+
+        if (add_entry(class->name->symbolName, type)) {
             LogError("\t%s name is already used for class type", class->name->symbolName);
             clean_resources_and_exit();
         }
