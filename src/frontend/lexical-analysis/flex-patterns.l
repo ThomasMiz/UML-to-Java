@@ -23,7 +23,7 @@
 
 /* Patrones reutilizables. */
 symbolName      [a-zA-Z][a-zA-Z0-9_]*
-letterOrPeriod [A-Z][A-Za-z.]*\.[A-Za-z.]+
+letterOrPeriod [A-Za-z]+(\.[A-Za-z]+)+
 endline         [\n]
 whitespace      [ \f\n\r\t\v]
 maybeWhitespace [ \f\n\r\t\v]*

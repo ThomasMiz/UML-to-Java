@@ -53,8 +53,6 @@ void writeTTypeName(const bufferADT buffer, const TTypeName* name) {
     writeGenerics(buffer, name->genericType);
 }
 
-
-
 void writeTCommaSeparatedTypenames(const bufferADT buffer, const TCommaSeparatedTypenames* names) {
     LogDebug("\twriteTCommaSeparatedTypenames(%lu)", names);
     while (names != NULL) {
@@ -88,12 +86,6 @@ void writeTInlineImportList(const bufferADT buffer, const TInlineImportList* imp
     }
 }
 
-// AMODS_NONE = 0,
-// AMODS_DEFAULT = 1 << 0,
-// AMODS_PRIVATE = 1 << 1,
-// AMODS_PROTECTED = 1 << 2,
-// AMODS_PUBLIC = 1 << 3
-
 void writeTAccessModifiers(const bufferADT buffer, const TAccessModifiers accessModifiers) {
     LogDebug("\twriteTAccessModifiers(%lu, %lu)", buffer, accessModifiers);
     if (accessModifiers & AMODS_NONE || accessModifiers & AMODS_DEFAULT) {
@@ -112,7 +104,7 @@ void writeTAccessModifiers(const bufferADT buffer, const TAccessModifiers access
 
     else if (accessModifiers & AMODS_PROTECTED) {
         write_buffer(buffer, "protected");
-       auxModifiers &= ~AMODS_PROTECTED;
+        auxModifiers &= ~AMODS_PROTECTED;
     }
 
     else if (accessModifiers & AMODS_PUBLIC) {
@@ -146,7 +138,7 @@ void writeTElementModifiers(const bufferADT buffer, const TElementModifiers elem
         }
 
         if (auxElementModifiers & EMODS_STATIC) {
-            if(type != CTYPE_INTERFACE) {
+            if (type != CTYPE_INTERFACE) {
                 write_buffer(buffer, "static");
             }
             added = EMODS_STATIC;
@@ -172,6 +164,20 @@ void writeTParameterList(const bufferADT buffer, const TParameterList* paramList
     }
 }
 
+void writeDefaultReturn(const bufferADT buffer, const char* type) {
+    if (strcmp(type, "void") == 0) {
+        write_buffer(buffer, "return;");
+    } else if (strcmp(type, "int") == 0 || strcmp(type, "short") == 0 || strcmp(type, "long") == 0 || strcmp(type, "char") == 0) {
+        write_buffer(buffer, "return 0;");
+    } else if (strcmp(type, "float") == 0 || strcmp(type, "double") == 0) {
+        write_buffer(buffer, "return 0.0;");
+    } else if (strcmp(type, "boolean") == 0) {
+        write_buffer(buffer, "return false;");
+    } else {
+        write_buffer(buffer, "return null;");
+    }
+}
+
 void writeTClassElement(const bufferADT buffer, const TClassElement* element, const TClassType type) {
     LogDebug("\twriteTClassElement(%lu, %lu)", buffer, element);
     TMethodParameterList* methodParamList = element->parameterList;
@@ -184,11 +190,13 @@ void writeTClassElement(const bufferADT buffer, const TClassElement* element, co
             clean_resources_and_exit();
         }
     }
+
+
     if (element->accessModifiers != AMODS_NONE) {
         writeTAccessModifiers(buffer, element->accessModifiers);
         write_buffer(buffer, " ");
     }
- 
+
     writeTElementModifiers(buffer, element->elementModifiers, type);
     write_buffer(buffer, " ");
     writeTTypeName(buffer, element->typeName);
@@ -204,9 +212,15 @@ void writeTClassElement(const bufferADT buffer, const TClassElement* element, co
         write_buffer(buffer, "(");
         writeTParameterList(buffer, methodParamList->parameterList);
         write_buffer(buffer, ")");
-        if (element->inlineCode != NULL) {
+
+        if (!(element->elementModifiers & EMODS_ABSTRACT)) {
             write_buffer(buffer, " {\n");
-            writeTInlineContent(buffer, element->inlineCode);
+            if (element->inlineCode != NULL) {
+                writeTInlineContent(buffer, element->inlineCode);
+            } else if (!is_method_constructor(element->symbolName)) {
+                writeDefaultReturn(buffer, element->symbolName);
+            }
+
             write_buffer(buffer, "}\n");
         } else {
             write_buffer(buffer, ";\n");
@@ -250,7 +264,7 @@ void generateClassFile(const TClassType type,
                        const TCommaSeparatedTypenames* implements,
                        const TInlineImportList* imports,
                        const TClassBody* body) {
-    new_class();
+    
     LogDebug("\tgenerateClassFile(%lu)", name);
     bufferADT buffer = init_buffer(name->symbolName);
 
@@ -281,13 +295,13 @@ void generateClassFile(const TClassType type,
     writeTClassBody(buffer, body, type);
     write_buffer(buffer, "}\n");
     generate_file(buffer);
-    end_class();
     destroy_buffer(buffer);
 }
 
 void generateClassFiles(const TUmlBody* body) {
     LogDebug("\tgenerateClassFiles(%lu)", body);
     while (body != NULL) {
+        new_class();
         TClassDefinition* class = body->bodyContent;
         if (add_entry(class->name->symbolName, TYPE_CLASS)) {
             LogError("\t%s name is already used for class type", class->name->symbolName);
@@ -299,6 +313,7 @@ void generateClassFiles(const TUmlBody* body) {
                           class->implements,
                           class->imports,
                           class->body);
+        end_class();
 
         body = body->next;
     }
@@ -364,6 +379,18 @@ const TClassDefinition* ClassDefinitionGrammarAction(const TTypeName* name, cons
     TClassDefinition* node = malloc(sizeof(TClassDefinition));
     node->name = (TTypeName*)name;
     node->type = CTYPE_CLASS;
+    node->extends = (TTypeName*)extends;
+    node->implements = (TCommaSeparatedTypenames*)implements;
+    node->imports = (TInlineImportList*)imports;
+    node->body = (TClassBody*)body;
+    return node;
+}
+
+const TClassDefinition* AbstractClassDefinitionGrammarAction(const TTypeName* name, const TTypeName* extends, const TCommaSeparatedTypenames* implements, const TInlineImportList* imports, const TClassBody* body) {
+    LogDebug("\tAbstractClassDefinitionGrammarAction(%lu, %lu, %lu, %lu, %lu)", name, extends, implements, imports, body);
+    TClassDefinition* node = malloc(sizeof(TClassDefinition));
+    node->name = (TTypeName*)name;
+    node->type = CTYPE_ABSTRACTCLASS;
     node->extends = (TTypeName*)extends;
     node->implements = (TCommaSeparatedTypenames*)implements;
     node->imports = (TInlineImportList*)imports;

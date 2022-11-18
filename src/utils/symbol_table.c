@@ -27,13 +27,6 @@ void init_symbol_table() {
     last_id = 0;
 }
 
-// static void eliminate_variable_names(TParameterList * params) {
-//     while (params != NULL) {
-//         *(params->symbolName) = 0;
-//         params = params->next;
-//     }
-// }
-
 void _write_param_types(bufferADT buffer, TParameterList* paramList) {
     while (paramList != NULL) {
         writeTTypeName(buffer, paramList->typeName);
@@ -114,6 +107,20 @@ void new_class() {
 void end_class() {
     LogDebug("\tend class with id = %d", current_id);
     current_id = 0;
+}
+
+int is_method_constructor(char * name) {
+
+    for (int i = dim-1 ; i >= 0 ;i--) {
+
+        if (strcmp(table[i].name, name) == 0 && table[i].type == TYPE_CLASS && table[i].class_id == current_id) {
+            return 1;
+        } else if (table[i].class_id < current_id) {
+            return 0;
+        }
+    }
+
+    return 0;
 }
 
 

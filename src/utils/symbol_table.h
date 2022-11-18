@@ -14,4 +14,5 @@ void destroy_symbol_table();
 void new_class();
 void end_class();
 int add_entry_method(char * name, TMethodParameterList* param_list);
+int is_method_constructor(char * name);
 #endif

@@ -141,6 +141,10 @@ interfaceDefinition: INTERFACE typeName[name] extends[ext] OPEN_BLOCK maybeEndli
 																	{ $$ = InterfaceDefinitionGrammarAction($name, $ext, $imports, $body); }
 	;
 
+abstractClassDefinition: ABSTRACT CLASS typeName[name] extends[ext] implements[imp] OPEN_BLOCK maybeEndlines inlineImportList[imports] abstractClassBody[body] CLOSE_BLOCK
+																	{ $$ = AbstractClassDefinitionGrammarAction($name, $ext, $imp, $imports, $body); }
+	;
+
 extends: EXTENDS typeName[type]										{ $$ = ExtendsGrammarAction($type); }
 	| /* lambda */													{ $$ = NULL; }
 	;
@@ -167,10 +171,6 @@ classElement: symbolName[name] methodParams[params]	maybeInlineCode[code]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, NULL, $code); }
 	| staticAndFinalModifiers[mods] typeName[type] symbolName[name] maybeMethodParams[params] inlineCode[code]
 																	{ $$ = ClassElementGrammarAction($mods, $type, $name, $params, $code); }
-	;
-
-abstractClassDefinition: ABSTRACT CLASS typeName[name] extends[ext] implements[imp] OPEN_BLOCK maybeEndlines inlineImportList[imports] abstractClassBody[body] CLOSE_BLOCK 
-																	{ $$ = ClassDefinitionGrammarAction($name, $ext, $imp, $imports, $body); }
 	;
 
 abstractClassBody: abstractClassBodyContent[content] endlines abstractClassBody[next]

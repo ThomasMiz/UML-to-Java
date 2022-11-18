@@ -19,4 +19,5 @@ bison-parser.h
 flex-scanner.c
 program
 
-output/*
+output/
+

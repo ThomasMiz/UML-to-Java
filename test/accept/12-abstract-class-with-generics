@@ -4,10 +4,10 @@ abstract class Empanada {
     # Empanada(Carne<T> c, Verdura<D> d)
     # Empanada(int i) 'code: hola();
     
-    # {static} final List<Integer> constante 'code: new ArrayList<Integer>
+    # {static} final List<Integer> constante 'code: new ArrayList<Integer>();
     + {abstract} void hola()
-    {abstract} void quetal()
-    ~ {static} void soyEstatico() 'code: return;
+    void quetal()
+    ~ {abstract} void soyEstatico()
     {static} final void soyFaina() 'code: return;
     + {static} Function<Boolean,Boolean> variableEstatic
 }

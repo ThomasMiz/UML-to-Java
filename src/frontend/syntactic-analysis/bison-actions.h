@@ -18,6 +18,7 @@ const TUmlBody* UmlBodyGrammarAction(const TClassDefinition* classDefinition, co
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */
 
 const TClassDefinition* ClassDefinitionGrammarAction(const TTypeName* name, const TTypeName* extends, const TCommaSeparatedTypenames* implements, const TInlineImportList* imports, const TClassBody* body);
+const TClassDefinition* AbstractClassDefinitionGrammarAction(const TTypeName* name, const TTypeName* extends, const TCommaSeparatedTypenames* implements, const TInlineImportList* imports, const TClassBody* body);
 const TClassDefinition* InterfaceDefinitionGrammarAction(const TTypeName* name, const TTypeName* extends, const TInlineImportList* imports, const TClassBody* body);
 const TTypeName* ExtendsGrammarAction(const TTypeName* type);
 const TCommaSeparatedTypenames* ImplementsGrammarAction(const TCommaSeparatedTypenames* commaSeparatedTypenames);
