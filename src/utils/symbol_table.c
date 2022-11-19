@@ -50,7 +50,7 @@ static bufferADT _get_method_full_name_buffer(char* name, TMethodParameterList* 
 }
 
 static void _add_entry(table_elem entry) {
-    LogDebug("\tadding entry for %s", entry.name);
+    LogDebug("adding entry for %s", entry.name);
     if (dim == size) {
         size += SIZE;
         table = realloc(table, size * sizeof(table_elem));
@@ -134,7 +134,7 @@ int is_valid_implements(const TCommaSeparatedTypenames* names) {
 }
 
 static void _print_table() {
-    LogDebug("\tPrinting current table:");
+    LogDebug("Printing current table:");
     for (int i = 0; i < dim; i++) {
         _print_entry(table[i]);
     }
@@ -155,11 +155,11 @@ static int _has_entry(table_elem entry) {
 void new_class() {
     last_id++;
     current_id = last_id;
-    LogDebug("\tnew class with id = %d", current_id);
+    LogDebug("new class with id = %d", current_id);
 }
 
 void end_class() {
-    LogDebug("\tend class with id = %d", current_id);
+    LogDebug("end class with id = %d", current_id);
     current_id = 0;
 }
 
@@ -180,7 +180,7 @@ int is_method_constructor(char* name) {
 int add_entry_method(char* name, TMethodParameterList* param_list) {
     // buscar si la clase se llama igual, si se llama igual es porque es un constructor
     // entonces agregamos como nombre a los parametros entre parentesis como parte del string
-    LogDebug("\ttrying to add entry for method %s", name);
+    LogDebug("trying to add entry for method %s", name);
     _print_table();
 
     bufferADT buffer = _get_method_full_name_buffer(name, param_list);
@@ -194,7 +194,7 @@ int add_entry_method(char* name, TMethodParameterList* param_list) {
 }
 
 int add_entry(char* name, TSymbolType type) {
-    LogDebug("\ttrying to add entry for %s", name);
+    LogDebug("trying to add entry for %s", name);
     table_elem entry = _get_entry(name, type);
     _print_entry(entry);
     _print_table();

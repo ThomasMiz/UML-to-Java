@@ -6,8 +6,121 @@
 #include "../../utils/buffer.h"
 #include "../../utils/symbol_table.h"
 
+static TUml* root;
+
+static void free_TTypeName(TTypeName* typeName);
+
+static void free_TCommaSeparatedTypenames(TCommaSeparatedTypenames* typeNames) {
+    LogDebug("free_TCommaSeparatedTypenames");
+    if (typeNames == NULL)
+        return;
+    free_TCommaSeparatedTypenames(typeNames->next);
+    free_TTypeName(typeNames->typeName);
+    free(typeNames);
+}
+
+static void free_TTypeName(TTypeName* typeName) {
+    if (typeName == NULL) {
+        return;
+    }
+    LogDebug("free_TTypeName");
+    free_TCommaSeparatedTypenames(typeName->genericType);
+    free(typeName->symbolName);
+    free(typeName);
+}
+
+static void free_TInlineContent(TInlineContent* inlineContent) {
+    LogDebug("free_TInlineContent");
+    if (inlineContent == NULL)
+        return;
+    free_TInlineContent(inlineContent->next);
+    free(inlineContent);
+}
+
+static void free_TInlineImportList(TInlineImportList* list) {
+    LogDebug("free_TInlineImportList");
+    if (list == NULL) {
+        return;
+    }
+    free_TInlineImportList(list->next);
+    free_TInlineContent(list->import);
+    free(list);
+}
+
+static void free_TParamList(TParameterList* paramList) {
+    LogDebug("free_TParamList");
+    if (paramList == NULL) {
+        return;
+    }
+
+    free_TParamList(paramList->next);
+    free_TTypeName(paramList->typeName);
+    free(paramList->symbolName);
+    free(paramList);
+}
+
+static void free_TMethodParameterList(TMethodParameterList* paramList) {
+    LogDebug("free_TMethodParameterList");
+    if (paramList != NULL) {
+        free_TParamList(paramList->parameterList);
+    }
+}
+
+static void free_TClassElement(TClassElement* element) {
+    LogDebug("free_TClassElement");
+    if (element == NULL)
+        return;
+
+    free_TInlineContent(element->inlineCode);
+    free_TMethodParameterList(element->parameterList);
+    free(element->symbolName);
+    free_TTypeName(element->typeName);
+}
+
+static void free_TClassBody(TClassBody* body) {
+    LogDebug("free_TClassBody");
+    if (body == NULL)
+        return;
+    free_TClassBody(body->next);
+    free_TInlineContent(body->comment);
+    free_TClassElement(body->element);
+    free(body);
+}
+
+static void free_TClassDefinition(TClassDefinition* class) {
+    LogDebug("free_TClassDefinition");
+    free_TTypeName(class->extends);
+    free_TCommaSeparatedTypenames(class->implements);
+    free_TInlineImportList(class->imports);
+    free_TTypeName(class->name);
+    free_TClassBody(class->body);
+}
+
+static void free_TUmlBody(TUmlBody* body) {
+    LogDebug("free_TUmlBody");
+    if (body == NULL) {
+        return;
+    }
+    free_TUmlBody(body->next);
+    free_TClassDefinition(body->bodyContent);
+    free(body);
+}
+
+static void clean_resources() {
+    TUml* root = (TUml*)state.program;
+    LogDebug("clean_resources");
+    while (root != NULL) {
+        free_TUmlBody(root->body);
+        TUml* aux = root;
+        root = root->next;
+        free(aux);
+    }
+}
+
 static void clean_resources_and_exit() {
-    LogInfo("\texiting");
+    LogInfo("exiting");
+    clean_resources();
+    state.result = -1;
     exit(-1);
 }
 
@@ -21,7 +134,7 @@ static void clean_resources_and_exit() {
 void yyerror(const char* string) {
     LogError("Mensaje: '%s' debido a '%s' (linea %d).", string, yytext, yylineno);
     LogError("En ASCII es:");
-    LogErrorRaw("\t");
+    LogErrorRaw("");
     const int length = strlen(yytext);
     for (int i = 0; i < length; ++i) {
         LogErrorRaw("[%d]", yytext[i]);
@@ -30,7 +143,7 @@ void yyerror(const char* string) {
 }
 
 void writeGenerics(const bufferADT buffer, const TCommaSeparatedTypenames* generics) {
-    LogDebug("\twriteGenerics(%lu)", generics);
+    LogDebug("writeGenerics(%lu)", generics);
     if (generics == NULL)
         return;
 
@@ -45,7 +158,7 @@ void writeGenerics(const bufferADT buffer, const TCommaSeparatedTypenames* gener
 }
 
 void writeTTypeName(const bufferADT buffer, const TTypeName* name) {
-    LogDebug("\twriteTTypeName(%lu)", name);
+    LogDebug("writeTTypeName(%lu)", name);
     if (name == NULL)
         return;
 
@@ -54,7 +167,7 @@ void writeTTypeName(const bufferADT buffer, const TTypeName* name) {
 }
 
 void writeTCommaSeparatedTypenames(const bufferADT buffer, const TCommaSeparatedTypenames* names) {
-    LogDebug("\twriteTCommaSeparatedTypenames(%lu)", names);
+    LogDebug("writeTCommaSeparatedTypenames(%lu)", names);
     while (names != NULL) {
         writeTTypeName(buffer, names->typeName);
         names = names->next;
@@ -64,20 +177,21 @@ void writeTCommaSeparatedTypenames(const bufferADT buffer, const TCommaSeparated
 }
 
 void writeTInlineContent(const bufferADT buffer, const TInlineContent* content) {
-    LogDebug("\twriteTInlineContent(%lu)", content);
+    LogDebug("writeTInlineContent(%lu)", content);
     while (content != NULL) {
-        LogDebug("\tcontent(%lu)", content->content);
+        LogDebug("content(%lu)", content->content);
         write_buffer(buffer, content->content);
         content = content->next;
     }
 }
 
 void writeTInlineImportList(const bufferADT buffer, const TInlineImportList* imports) {
-    LogDebug("\twriteTInlineImportList(%lu)", imports);
+    LogDebug("writeTInlineImportList(%lu)", imports);
     while (imports != NULL) {
         if (add_entry(imports->import->content, TYPE_IMPORT)) {
             LogError("entry for import %s is repeated", imports->import->content);
-            clean_resources_and_exit();
+            state.result = -1;
+            return;
         }
         write_buffer(buffer, "import ");
         writeTInlineContent(buffer, imports->import);
@@ -87,7 +201,7 @@ void writeTInlineImportList(const bufferADT buffer, const TInlineImportList* imp
 }
 
 void writeTAccessModifiers(const bufferADT buffer, const TAccessModifiers accessModifiers) {
-    LogDebug("\twriteTAccessModifiers(%lu, %lu)", buffer, accessModifiers);
+    LogDebug("writeTAccessModifiers(%lu, %lu)", buffer, accessModifiers);
     if (accessModifiers & AMODS_NONE || accessModifiers & AMODS_DEFAULT) {
         return;
     }
@@ -115,7 +229,7 @@ void writeTAccessModifiers(const bufferADT buffer, const TAccessModifiers access
 
 void writeTElementModifiers(const bufferADT buffer, const TElementModifiers elementModifiers, const TClassType type) {
     int a = elementModifiers;
-    LogDebug("\twriteTElementModifiers(%lu, %d)", buffer, a);
+    LogDebug("writeTElementModifiers(%lu, %d)", buffer, a);
     if (elementModifiers & EMODS_NONE) {
         return;
     }
@@ -153,7 +267,7 @@ void writeTElementModifiers(const bufferADT buffer, const TElementModifiers elem
 }
 
 void writeTParameterList(const bufferADT buffer, const TParameterList* paramList) {
-    LogDebug("\twriteTParameterList(%lu, %lu)", buffer, paramList);
+    LogDebug("writeTParameterList(%lu, %lu)", buffer, paramList);
     while (paramList != NULL) {
         writeTTypeName(buffer, paramList->typeName);
         write_buffer(buffer, " ");
@@ -179,7 +293,7 @@ void writeDefaultReturn(const bufferADT buffer, const char* type) {
 }
 
 void writeTClassElement(const bufferADT buffer, const TClassElement* element, const TClassType type) {
-    LogDebug("\twriteTClassElement(%lu, %lu)", buffer, element);
+    LogDebug("writeTClassElement(%lu, %lu)", buffer, element);
     TMethodParameterList* methodParamList = element->parameterList;
     TClassType auxType = type;
     if (auxType == CTYPE_INTERFACE && !(element->elementModifiers & EMODS_ABSTRACT)) {
@@ -187,7 +301,8 @@ void writeTClassElement(const bufferADT buffer, const TClassElement* element, co
 
         if (element->elementModifiers & EMODS_STATIC && element->parameterList != NULL) {
             LogError("An interface cannot be static and have a default implementation");
-            clean_resources_and_exit();
+            state.result = -1;
+            state.succeed = false;
         }
     }
 
@@ -205,7 +320,8 @@ void writeTClassElement(const bufferADT buffer, const TClassElement* element, co
     if (methodParamList != NULL) {
         if (add_entry_method(element->symbolName, methodParamList)) {
             LogError("entry for method %s is repeated", element->symbolName);
-            clean_resources_and_exit();
+            state.result = -1;
+            state.succeed = false;
         }
 
         write_buffer(buffer, "(");
@@ -228,7 +344,8 @@ void writeTClassElement(const bufferADT buffer, const TClassElement* element, co
     }
     if (add_entry(element->symbolName, TYPE_CLASS_ELEM)) {
         LogError("entry for variable %s is repeated", element->symbolName);
-        clean_resources_and_exit();
+        state.result = -1;
+        state.succeed = false;
     }
     TInlineContent* inlineContent = element->inlineCode;
     if (inlineContent != NULL) {
@@ -241,7 +358,7 @@ void writeTClassElement(const bufferADT buffer, const TClassElement* element, co
 }
 
 void writeTClassBody(const bufferADT buffer, const TClassBody* body, const TClassType type) {
-    LogDebug("\twriteTClassBody(%lu, %lu)", buffer, body);
+    LogDebug("writeTClassBody(%lu, %lu)", buffer, body);
     while (body != NULL) {
         if (body->comment != NULL) {
             write_buffer(buffer, "/*");
@@ -251,7 +368,8 @@ void writeTClassBody(const bufferADT buffer, const TClassBody* body, const TClas
             writeTClassElement(buffer, body->element, type);
         } else {
             LogErrorRaw("Unexpected class element type");
-            clean_resources_and_exit();
+            state.result = -1;
+            state.succeed = false;
         }
         body = body->next;
     }
@@ -271,7 +389,7 @@ void generateClassFile(const TClassType type,
                        const TInlineImportList* imports,
                        const TClassBody* body) {
 
-    LogDebug("\tgenerateClassFile(%lu)", name);
+    LogDebug("generateClassFile(%lu)", name);
     bufferADT buffer = init_buffer(name->symbolName);
 
     writeTInlineImportList(buffer, imports);
@@ -293,7 +411,8 @@ void generateClassFile(const TClassType type,
         write_buffer(buffer, " extends ");
         if (!is_valid_extends(extends, type)) {
             LogError("Not a valid entity to extend");
-            clean_resources_and_exit();
+            state.result = -1;
+            state.succeed = false;
         }
         writeTTypeName(buffer, extends);
     }
@@ -301,27 +420,34 @@ void generateClassFile(const TClassType type,
         write_buffer(buffer, " implements ");
         if (!is_valid_implements(implements)) {
             LogError("Not a valid entity to implement");
-            clean_resources_and_exit();
+            state.result = -1;
+            state.succeed = false;
         }
         writeTCommaSeparatedTypenames(buffer, implements);
     }
     write_buffer(buffer, " {\n");
     writeTClassBody(buffer, body, type);
     write_buffer(buffer, "}\n");
-    generate_file(buffer);
+    if (!state.result) {
+        generate_file(buffer);
+    }
     destroy_buffer(buffer);
 }
 
 void generateClassFiles(const TUmlBody* body) {
-    LogDebug("\tgenerateClassFiles(%lu)", body);
+    LogDebug("generateClassFiles(%lu)", body);
     while (body != NULL) {
         new_class();
         TClassDefinition* class = body->bodyContent;
         TSymbolType type = TYPE_CLASS | (class->type == CTYPE_INTERFACE ? TYPE_INTERFACE : 0);
 
         if (add_entry(class->name->symbolName, type)) {
-            LogError("\t%s name is already used for class type", class->name->symbolName);
-            clean_resources_and_exit();
+            LogError("%s name is already used for class type", class->name->symbolName);
+            state.result = -1;
+            state.succeed = false;
+        }
+        if (state.result) {
+            break;
         }
         generateClassFile(class->type,
                           class->name,
@@ -336,7 +462,7 @@ void generateClassFiles(const TUmlBody* body) {
 }
 
 void generateUmlFiles(const TUml* uml) {
-    LogDebug("\tgenerateUmlFiles(%lu)", uml);
+    LogDebug("generateUmlFiles(%lu)", uml);
     while (uml != NULL) {
         generateClassFiles(uml->body);
         uml = uml->next;
@@ -350,16 +476,20 @@ void generateUmlFiles(const TUml* uml) {
  * gramática, o lo que es lo mismo, que el programa pertenece al lenguaje.
  */
 int StartGrammarAction(const TUml* uml) {
-    LogDebug("\tStartGrammarAction(%lu)", uml);
+    LogDebug("StartGrammarAction(%lu)", uml);
+    state.program = uml;
+    state.result = 0;
+    state.succeed = true;
     init_symbol_table();
     generateUmlFiles(uml);
     destroy_symbol_table();
+    clean_resources();
     /*
      * "state" es una variable global que almacena el estado del compilador,
      * cuyo campo "succeed" indica si la compilación fue o no exitosa, la cual
      * es utilizada en la función "main".
      */
-    state.succeed = true;
+
     /*
      * Por otro lado, "result" contiene el resultado de aplicar el análisis
      * sintáctico mediante Bison, y almacenar el nood raíz del AST construido
@@ -367,13 +497,12 @@ int StartGrammarAction(const TUml* uml) {
      * la expresión se computa on-the-fly, y es la razón por la cual esta
      * variable es un simple entero, en lugar de un nodo.
      */
-    state.result = 420;
-    state.program = uml;
+
     return state.result;
 }
 
 TUml* UmlGrammarAction(const TUmlBody* body, const TUml* next) {
-    LogDebug("\tUmlGrammarAction(%lu, %lu)", body, next);
+    LogDebug("UmlGrammarAction(%lu, %lu)", body, next);
     TUml* node = malloc(sizeof(TUml));
     node->body = (TUmlBody*)body;
     node->next = (TUml*)next;
@@ -381,7 +510,7 @@ TUml* UmlGrammarAction(const TUmlBody* body, const TUml* next) {
 }
 
 const TUmlBody* UmlBodyGrammarAction(const TClassDefinition* classDefinition, const TUmlBody* next) {
-    LogDebug("\tUmlBodyGrammarAction(%lu, %lu)", classDefinition, next);
+    LogDebug("UmlBodyGrammarAction(%lu, %lu)", classDefinition, next);
     TUmlBody* node = malloc(sizeof(TUmlBody));
     node->bodyContent = (TClassDefinition*)classDefinition;
     node->next = (TUmlBody*)next;
@@ -391,7 +520,7 @@ const TUmlBody* UmlBodyGrammarAction(const TClassDefinition* classDefinition, co
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */
 
 const TClassDefinition* ClassDefinitionGrammarAction(const TTypeName* name, const TTypeName* extends, const TCommaSeparatedTypenames* implements, const TInlineImportList* imports, const TClassBody* body) {
-    LogDebug("\tClassDefinitionGrammarAction(%lu, %lu, %lu, %lu, %lu)", name, extends, implements, imports, body);
+    LogDebug("ClassDefinitionGrammarAction(%lu, %lu, %lu, %lu, %lu)", name, extends, implements, imports, body);
     TClassDefinition* node = malloc(sizeof(TClassDefinition));
     node->name = (TTypeName*)name;
     node->type = CTYPE_CLASS;
@@ -403,7 +532,7 @@ const TClassDefinition* ClassDefinitionGrammarAction(const TTypeName* name, cons
 }
 
 const TClassDefinition* AbstractClassDefinitionGrammarAction(const TTypeName* name, const TTypeName* extends, const TCommaSeparatedTypenames* implements, const TInlineImportList* imports, const TClassBody* body) {
-    LogDebug("\tAbstractClassDefinitionGrammarAction(%lu, %lu, %lu, %lu, %lu)", name, extends, implements, imports, body);
+    LogDebug("AbstractClassDefinitionGrammarAction(%lu, %lu, %lu, %lu, %lu)", name, extends, implements, imports, body);
     TClassDefinition* node = malloc(sizeof(TClassDefinition));
     node->name = (TTypeName*)name;
     node->type = CTYPE_ABSTRACTCLASS;
@@ -415,7 +544,7 @@ const TClassDefinition* AbstractClassDefinitionGrammarAction(const TTypeName* na
 }
 
 const TClassDefinition* InterfaceDefinitionGrammarAction(const TTypeName* name, const TTypeName* extends, const TInlineImportList* imports, const TClassBody* body) {
-    LogDebug("\tInterfaceDefinitionGrammarAction(%s, %lu, %lu, %lu)", name, extends, imports, body);
+    LogDebug("InterfaceDefinitionGrammarAction(%s, %lu, %lu, %lu)", name, extends, imports, body);
     TClassDefinition* node = malloc(sizeof(TClassDefinition));
     node->name = (TTypeName*)name;
     node->type = CTYPE_INTERFACE;
@@ -427,23 +556,23 @@ const TClassDefinition* InterfaceDefinitionGrammarAction(const TTypeName* name, 
 }
 
 const TTypeName* ExtendsGrammarAction(const TTypeName* type) {
-    LogDebug("\tExtendsGrammarAction(%lu)", type);
+    LogDebug("ExtendsGrammarAction(%lu)", type);
     return type;
 }
 
 const TCommaSeparatedTypenames* ImplementsGrammarAction(const TCommaSeparatedTypenames* commaSeparatedTypenames) {
-    LogDebug("\tImplementsGrammarAction(%lu)", commaSeparatedTypenames);
+    LogDebug("ImplementsGrammarAction(%lu)", commaSeparatedTypenames);
     return commaSeparatedTypenames;
 }
 
 const TClassBody* ClassBodyGrammarAction(TClassBody* body, const TClassBody* next) {
-    LogDebug("\tClassBodyGrammarAction(%lu, %lu)", body, next);
+    LogDebug("ClassBodyGrammarAction(%lu, %lu)", body, next);
     body->next = (TClassBody*)next;
     return body;
 }
 
 TClassBody* ClassBodyContentGrammarAction(const TAccessModifiers accessMods, TClassElement* element) {
-    LogDebug("\tClassBodyContentGrammarAction(%d, %lu)", accessMods, element);
+    LogDebug("ClassBodyContentGrammarAction(%d, %lu)", accessMods, element);
     element->accessModifiers = (TAccessModifiers)accessMods;
     TClassBody* node = malloc(sizeof(TClassBody));
     node->comment = NULL;
@@ -453,17 +582,17 @@ TClassBody* ClassBodyContentGrammarAction(const TAccessModifiers accessMods, TCl
 }
 
 TClassBody* ClassInlineCommentGrammarAction(const TInlineContent* content) {
-    LogDebug("\tClassInlineCommentGrammarAction(%lu)", content);
+    LogDebug("ClassInlineCommentGrammarAction(%lu)", content);
     TClassBody* node = malloc(sizeof(TClassBody));
     node->comment = (TInlineContent*)content;
-    LogDebug("\t%s\n", content->content);
+    LogDebug("%s\n", content->content);
     node->element = NULL;
     node->next = NULL;
     return node;
 }
 
 TClassElement* ClassConstructorGrammarAction(const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode) {
-    LogDebug("\tClassConstructorGrammarAction(%d, %d, %d)", name, params, inlineCode);
+    LogDebug("ClassConstructorGrammarAction(%d, %d, %d)", name, params, inlineCode);
     TClassElement* node = malloc(sizeof(TClassElement));
     node->accessModifiers = AMODS_NONE;
     node->elementModifiers = EMODS_NONE;
@@ -475,7 +604,7 @@ TClassElement* ClassConstructorGrammarAction(const char* name, const TMethodPara
 }
 
 TClassElement* ClassElementGrammarAction(const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode) {
-    LogDebug("\tClassElementGrammarAction(%u, %lu, %lu, %lu, %lu)", elementMods, type, name, params, inlineCode);
+    LogDebug("ClassElementGrammarAction(%u, %lu, %lu, %lu, %lu)", elementMods, type, name, params, inlineCode);
     TClassElement* node = malloc(sizeof(TClassElement));
     node->accessModifiers = AMODS_NONE;
     node->elementModifiers = (TElementModifiers)elementMods;
@@ -487,13 +616,13 @@ TClassElement* ClassElementGrammarAction(const TElementModifiers elementMods, co
 }
 
 const TClassBody* InterfaceBodyGrammarAction(TClassBody* body, const TClassBody* next) {
-    LogDebug("\tInterfaceBodyGrammarAction(%lu, %lu)", body, next);
+    LogDebug("InterfaceBodyGrammarAction(%lu, %lu)", body, next);
     body->next = (TClassBody*)next;
     return body;
 }
 
-const TClassBody* InterfaceBodyContentGrammarAction(const TAccessModifiers accessMods, const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode) {
-    LogDebug("\tInterfaceBodyContentGrammarAction(%d, %d, %lu, %lu, %lu, %lu)", accessMods, elementMods, type, name, params, inlineCode);
+TClassBody* InterfaceBodyContentGrammarAction(const TAccessModifiers accessMods, const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode) {
+    LogDebug("InterfaceBodyContentGrammarAction(%d, %d, %lu, %lu, %lu, %lu)", accessMods, elementMods, type, name, params, inlineCode);
     TClassElement* node = malloc(sizeof(TClassElement));
     node->accessModifiers = (TAccessModifiers)accessMods;
     node->elementModifiers = (TElementModifiers)elementMods;
@@ -513,14 +642,14 @@ const TClassBody* InterfaceBodyContentGrammarAction(const TAccessModifiers acces
 /* -V-------------------------------------- Methods --------------------------------------V- */
 
 const TMethodParameterList* MethodParamsGrammarAction(const TParameterList* paramList) {
-    LogDebug("\tMethodParamsGrammarAction(%lu)", paramList);
+    LogDebug("MethodParamsGrammarAction(%lu)", paramList);
     TMethodParameterList* node = malloc(sizeof(TMethodParameterList));
     node->parameterList = (TParameterList*)paramList;
     return node;
 }
 
 const TParameterList* ParameterGrammarAction(const TTypeName* type, const char* name) {
-    LogDebug("\tParameterGrammarAction(%lu, %lu)", type, name);
+    LogDebug("ParameterGrammarAction(%lu, %lu)", type, name);
     TParameterList* node = malloc(sizeof(TParameterList));
     node->typeName = (TTypeName*)type;
     node->symbolName = (char*)name;
@@ -529,7 +658,7 @@ const TParameterList* ParameterGrammarAction(const TTypeName* type, const char* 
 }
 
 const TParameterList* ParameterListGrammarAction(const TTypeName* type, const char* name, const TParameterList* next) {
-    LogDebug("\tParameterListGrammarAction(%lu, %lu, %lu)", type, name, next);
+    LogDebug("ParameterListGrammarAction(%lu, %lu, %lu)", type, name, next);
     TParameterList* node = malloc(sizeof(TParameterList));
     node->typeName = (TTypeName*)type;
     node->symbolName = (char*)name;
@@ -540,49 +669,49 @@ const TParameterList* ParameterListGrammarAction(const TTypeName* type, const ch
 /* -V-------------------------------------- Modifiers --------------------------------------V- */
 
 TAccessModifiers DefaultGrammarAction() {
-    LogDebug("\tDefaultGrammarAction()");
+    LogDebug("DefaultGrammarAction()");
     return AMODS_DEFAULT;
 }
 
 TAccessModifiers PrivateGrammarAction() {
-    LogDebug("\tPrivateGrammarAction()");
+    LogDebug("PrivateGrammarAction()");
     return AMODS_PRIVATE;
 }
 
 TAccessModifiers ProtectedGrammarAction() {
-    LogDebug("\tProtectedGrammarAction()");
+    LogDebug("ProtectedGrammarAction()");
     return AMODS_PROTECTED;
 }
 
 TAccessModifiers PublicGrammarAction() {
-    LogDebug("\tPublicGrammarAction()");
+    LogDebug("PublicGrammarAction()");
     return AMODS_PUBLIC;
 }
 
 TElementModifiers AbstractGrammarAction() {
-    LogDebug("\tAbstractGrammarAction()");
+    LogDebug("AbstractGrammarAction()");
     return EMODS_ABSTRACT;
 }
 
 TElementModifiers StaticGrammarAction() {
-    LogDebug("\tStaticGrammarAction()");
+    LogDebug("StaticGrammarAction()");
     return EMODS_STATIC;
 }
 
 TElementModifiers FinalGrammarAction() {
-    LogDebug("\tFinalGrammarAction(%d)", EMODS_FINAL);
+    LogDebug("FinalGrammarAction(%d)", EMODS_FINAL);
     return EMODS_FINAL;
 }
 
 /* -V-------------------------------------- Misc --------------------------------------V- */
 
 const char* SymbolnameGrammarAction(const char* symbol) {
-    LogDebug("\tSymbolnameGrammarAction(%s)", symbol);
+    LogDebug("SymbolnameGrammarAction(%s)", symbol);
     return symbol;
 }
 
 const TTypeName* TypenameGrammarAction(const char* name) {
-    LogDebug("\tTypenameGrammarAction(%s)", name);
+    LogDebug("TypenameGrammarAction(%s)", name);
     TTypeName* node = malloc(sizeof(TTypeName));
     node->symbolName = (char*)name;
     node->genericType = NULL;
@@ -590,7 +719,7 @@ const TTypeName* TypenameGrammarAction(const char* name) {
 }
 
 const TTypeName* GenericTypenameGrammarAction(const char* name, const TCommaSeparatedTypenames* genericType) {
-    LogDebug("\tGenericTypenameGrammarAction(%s, %lu)", name, genericType);
+    LogDebug("GenericTypenameGrammarAction(%s, %lu)", name, genericType);
     TTypeName* node = malloc(sizeof(TTypeName));
     node->symbolName = (char*)name;
     node->genericType = (TCommaSeparatedTypenames*)genericType;
@@ -598,7 +727,7 @@ const TTypeName* GenericTypenameGrammarAction(const char* name, const TCommaSepa
 }
 
 const TCommaSeparatedTypenames* CommaSeparatedTypenameGrammarAction(const TTypeName* type) {
-    LogDebug("\tCommaSeparatedTypenameGrammarAction(%lu)", type);
+    LogDebug("CommaSeparatedTypenameGrammarAction(%lu)", type);
     TCommaSeparatedTypenames* node = malloc(sizeof(TCommaSeparatedTypenames));
     node->typeName = (TTypeName*)type;
     node->next = NULL;
@@ -606,7 +735,7 @@ const TCommaSeparatedTypenames* CommaSeparatedTypenameGrammarAction(const TTypeN
 }
 
 const TCommaSeparatedTypenames* CommaSeparatedTypenamesGrammarAction(const TTypeName* type, const TCommaSeparatedTypenames* next) {
-    LogDebug("\tCommaSeparatedTypenamesGrammarAction(%lu, %lu)", type, next);
+    LogDebug("CommaSeparatedTypenamesGrammarAction(%lu, %lu)", type, next);
     TCommaSeparatedTypenames* node = malloc(sizeof(TCommaSeparatedTypenames));
     node->typeName = (TTypeName*)type;
     node->next = (TCommaSeparatedTypenames*)next;
@@ -616,7 +745,7 @@ const TCommaSeparatedTypenames* CommaSeparatedTypenamesGrammarAction(const TType
 /* -V-------------------------------------- Inlines --------------------------------------V- */
 
 const TInlineContent* InlineContentGrammarAction(const char* content) {
-    LogDebug("\tInlineContentGrammarAction(%s)", content);
+    LogDebug("InlineContentGrammarAction(%s)", content);
     TInlineContent* node = malloc(sizeof(TInlineContent));
     node->content = (char*)content;
     node->next = NULL;
@@ -624,7 +753,7 @@ const TInlineContent* InlineContentGrammarAction(const char* content) {
 }
 
 const TInlineContent* InlineContentsGrammarAction(const char* content, const TInlineContent* next) {
-    LogDebug("\tInlineContentsGrammarAction(%s, %lu)", content, next);
+    LogDebug("InlineContentsGrammarAction(%s, %lu)", content, next);
     TInlineContent* node = malloc(sizeof(TInlineContent));
     node->content = (char*)content;
     node->next = (TInlineContent*)next;
@@ -632,22 +761,22 @@ const TInlineContent* InlineContentsGrammarAction(const char* content, const TIn
 }
 
 const TInlineContent* InlineCodeGrammarAction(const TInlineContent* content) {
-    LogDebug("\tInlineCodeGrammarAction(%lu)", content);
+    LogDebug("InlineCodeGrammarAction(%lu)", content);
     return content;
 }
 
 const TInlineContent* InlineCommentGrammarAction(const TInlineContent* content) {
-    LogDebug("\tInlineCommentGrammarAction(%lu)", content);
+    LogDebug("InlineCommentGrammarAction(%lu)", content);
     return content;
 }
 
 const TInlineContent* InlineImportGrammarAction(const TInlineContent* content) {
-    LogDebug("\tInlineImportGrammarAction(%lu)", content);
+    LogDebug("InlineImportGrammarAction(%lu)", content);
     return content;
 }
 
 const TInlineImportList* InlineImportListGrammarAction(const TInlineContent* content, const TInlineImportList* next) {
-    LogDebug("\tInlineImportListGrammarAction(%lu, %lu)", content, next);
+    LogDebug("InlineImportListGrammarAction(%lu, %lu)", content, next);
     TInlineImportList* node = malloc(sizeof(TInlineImportList));
     node->import = (TInlineContent*)content;
     node->next = (TInlineImportList*)next;

@@ -28,7 +28,7 @@ TClassBody* ClassInlineCommentGrammarAction(const TInlineContent* content);
 TClassElement* ClassConstructorGrammarAction(const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode);
 TClassElement* ClassElementGrammarAction(const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode);
 const TClassBody* InterfaceBodyGrammarAction(TClassBody* body, const TClassBody* next);
-const TClassBody* InterfaceBodyContentGrammarAction(const TAccessModifiers accessMods, const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode);
+TClassBody* InterfaceBodyContentGrammarAction(const TAccessModifiers accessMods, const TElementModifiers elementMods, const TTypeName* type, const char* name, const TMethodParameterList* params, const TInlineContent* inlineCode);
 
 /* -V-------------------------------------- Methods --------------------------------------V- */
 

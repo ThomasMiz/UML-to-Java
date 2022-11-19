@@ -134,7 +134,7 @@ umlBodyContent: classDefinition										{ $$ = $1; }
 /* -V-------------------------------------- Classes & Interfaces --------------------------------------V- */
 
 classDefinition: CLASS typeName[name] extends[ext] implements[imp] OPEN_BLOCK maybeEndlines inlineImportList[imports] classBody[body] CLOSE_BLOCK
-																	{ $$ = ClassDefinitionGrammarAction($name, $ext, $imp, $imports, $body); }
+																	{ $$ = (TClassDefinition*)ClassDefinitionGrammarAction($name, $ext, $imp, $imports, $body); }
 	;
 
 interfaceDefinition: INTERFACE typeName[name] extends[ext] OPEN_BLOCK maybeEndlines inlineImportList[imports] interfaceBody[body] CLOSE_BLOCK
@@ -142,7 +142,7 @@ interfaceDefinition: INTERFACE typeName[name] extends[ext] OPEN_BLOCK maybeEndli
 	;
 
 abstractClassDefinition: ABSTRACT CLASS typeName[name] extends[ext] implements[imp] OPEN_BLOCK maybeEndlines inlineImportList[imports] abstractClassBody[body] CLOSE_BLOCK
-																	{ $$ = AbstractClassDefinitionGrammarAction($name, $ext, $imp, $imports, $body); }
+																	{ $$ =(TClassDefinition* ) AbstractClassDefinitionGrammarAction($name, $ext, $imp, $imports, $body); }
 	;
 
 extends: EXTENDS typeName[type]										{ $$ = ExtendsGrammarAction($type); }
