@@ -131,6 +131,7 @@ int is_valid_implements(const TCommaSeparatedTypenames* names) {
         destroy_buffer(auxBuffer);
         names = names->next;
     }
+	return 1;
 }
 
 static void _print_table() {
