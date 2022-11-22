@@ -73,9 +73,10 @@ void generate_file(bufferADT buffer) {
     strcat(tmp_buf, buffer->filename);
     system(tmp_buf);
 
-    strcpy(tmp_buf, "rm ./");
-    strcat(tmp_buf, buffer->filename);
+    //strcpy(tmp_buf, "rm ./");
+    //strcat(tmp_buf, buffer->filename);
     system(tmp_buf);
+    remove(buffer->filename);
 }
 
 void destroy_buffer(bufferADT buffer) {

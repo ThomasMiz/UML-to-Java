@@ -1,6 +1,6 @@
 @startuml
 
-abstract class Empanada {
+abstract class MalariaSaudita {
     # {static} final int constante 'code: 5;
     + {abstract} void hola()
     {abstract} void quetal()

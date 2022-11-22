@@ -1,20 +1,20 @@
 @startuml
 
-abstract class Empanada<Humita> {
+abstract class Empanadaa<Humita> {
     - int hola
 
-    Empanada()
-    + Empanada(Int hola, int chau) /'
+    Empanadaa()
+    + Empanadaa(Int hola, int chau) /'
         code:
         super();
         this.hola = chau;
 
     '/
 
-    # Empanadas(Pedro pedrito)
+    # Empanadaa(Pedro pedrito)
 }
 
-class Brownie<Loco> extends Empanada<Humita> {
+class Brownie<Loco> extends Empanadaa<Humita> {
     # Pedro pedro
 
     Brauni()

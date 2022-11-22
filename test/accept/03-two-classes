@@ -1,10 +1,10 @@
 @startuml
 
-class Potato {
+class EmptyPotato {
     
 }
 
-class Cabbage {
+class EmptyCabbage {
     
 }
 

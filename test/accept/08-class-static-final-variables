@@ -1,13 +1,13 @@
 @startuml
 
-class Empanada {
+class Empanadita {
     {static} int hola
     final int como
-    {static} final void estas /'
+    {static} final void estas() /'
         code: return;
     '/
 
-    final {static} void danonino 'code: return;
+    final {static} void danonino() 'code: return;
 }
 
 @enduml

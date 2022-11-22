@@ -1,8 +1,8 @@
 @startuml
 
-abstract class Empanada {
-    # Empanada(Carne<T> c, Verdura<D> d)
-    # Empanada(int i) 'code: hola();
+abstract class Kevin {
+    # Kevin(Carne<T> c, Verdura<D> d)
+    # Kevin(int i) 'code: hola();
     
     # {static} final List<Integer> constante 'code: new ArrayList<Integer>();
     + {abstract} void hola()

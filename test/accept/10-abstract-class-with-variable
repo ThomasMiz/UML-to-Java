@@ -1,6 +1,6 @@
 @startuml
 
-abstract class Empanada {
+abstract class ArabiaSaudita {
     int hola
 }
 
