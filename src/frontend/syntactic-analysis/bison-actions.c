@@ -297,12 +297,8 @@ void writeTClassElement(const bufferADT buffer, const TClassElement* element, co
     TMethodParameterList* methodParamList = element->parameterList;
     TClassType auxType = type;
     if (auxType == CTYPE_INTERFACE && !(element->elementModifiers & EMODS_ABSTRACT)) {
-        write_buffer(buffer, "default ");
-
-        if (element->elementModifiers & EMODS_STATIC && element->parameterList != NULL) {
-            LogError("An interface cannot be static and have a default implementation");
-            state.result = -1;
-            state.succeed = false;
+        if (!(element->elementModifiers & EMODS_STATIC)) {
+            write_buffer(buffer, "default ");
         }
     }
 
