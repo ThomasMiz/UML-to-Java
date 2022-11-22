@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include<stdlib.h>
+#include <stdlib.h>
+#include <sys/types.h>
 #include "buffer.h"
 #include <string.h>
 
@@ -9,7 +10,7 @@
 
 typedef struct bufferCDT {
     char * buffer;
-    ssize_t ptr;
+    long long ptr;
     size_t size;
     char * filename;
 
